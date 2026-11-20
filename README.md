@@ -9,6 +9,7 @@ ICF organizes a meaningful application action into six named stages. Use the wik
 - Browse the [worked example library](https://bryantfriend.github.io/learn_ICF/#examples) and follow an action from its inputs through the named stages to its outcome.
 - Find a named helper in the [API reference](https://bryantfriend.github.io/learn_ICF/#api) and open its implementation.
 - Practice with JavaScript exercises, concept questions and project plans in the [academy](https://bryantfriend.github.io/learn_ICF/academy.html). Each activity links to its wiki topic and supporting source. Course progress stays in the current browser.
+- Start with [JavaScript Basic](https://bryantfriend.github.io/learn_ICF/studio.html#js-basic-values) or follow the [seat booking project](https://bryantfriend.github.io/learn_ICF/programming-guide.html) for HTML, CSS, browser JavaScript, HTTP, JSON and Git practice.
 - Run the [library sandbox](https://bryantfriend.github.io/learn_ICF/reference.html#mission), change the scenario and follow the named step that passes or stops the loan.
 - Use the [template quick start](Template/README.md) to try the framework in a project. Explore the [JavaScript contract](Template/ICF.md), [Adaptive Context guide](Template/ADAPTIVE_CONTEXT.md) and [Roblox project](using%20ICF%20in%20Roblox/sample-project/README.md).
 

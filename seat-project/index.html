@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seat booking project · ICF Academy</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="page.mjs"></script>
+</head>
+<body>
+  <main>
+    <nav aria-label="Project navigation"><a href="../programming-guide.html">Project guide</a> · <a href="../academy.html">Academy</a></nav>
+    <h1>Book a study seat</h1>
+    <p>Try A1 or B2 as Ava or Bo. Try the same seat twice, or try booking as a guest.</p>
+    <form id="booking">
+      <label for="seat">Seat ID</label>
+      <input id="seat" name="seatId" placeholder="A1" autocomplete="off">
+      <label for="member">Sample learner</label>
+      <select id="member" name="memberId"><option value="ava">Ava</option><option value="bo">Bo</option><option value="guest">Guest</option></select>
+      <button type="submit" disabled>Book a seat</button>
+    </form>
+    <p id="status" role="status">Loading the sample seats…</p>
+    <details><summary>See which steps ran</summary><pre id="trace">Book a seat to see the steps.</pre></details>
+  </main>
+</body>
+</html>

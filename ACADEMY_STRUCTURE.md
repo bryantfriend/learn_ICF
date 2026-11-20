@@ -11,7 +11,14 @@ All current course activities use `studio.html` and its shared instruction/activ
 | Advanced | 12 | 11 coding lessons and one project plan |
 | Adaptive Context | 10 | Two concept checks, six guided exercises, an independent signal-adapter repair and a policy-update capstone |
 | Roblox | 26 | 25 Luau structure exercises and one project plan |
-| Total | 108 | 90 coding exercises, 14 concept checks, four project plans |
+| JavaScript Basic | 6 | First programs, conditions, debugging, and a seat-count project |
+| JavaScript Beginner | 8 | Functions, lists, objects, and a library request project |
+| JavaScript Intermediate | 8 | Modules, JSON, HTTP, async code, errors, testing, Git, and a lookup project |
+| JavaScript Advanced | 6 | Optional practice with transactions, retries, overlapping requests, and a final project |
+| Build a Web Page | 5 | HTML, CSS, form input, feedback, and a real ICF seat booking project |
+| Total | 141 | 123 coding exercises, 14 concept checks, four project plans |
+
+The [seat booking project guide](programming-guide.html) shows how to run, change, and test the project offline. It includes a real local HTTP request for JSON and a checkpoint students can save with Git.
 
 Every activity has the same Learn / Your task tabs, central activity panel, results panel, navigation, draft saving, hints, and section menu. The central panel presents code, answer choices, or project fields according to the task. Students can review any section without losing their current work.
 

@@ -54,7 +54,7 @@ async function(page) {
   await page.screenshot({ path: 'output/playwright/adaptive-mobile.png', fullPage: true });
   await page.goto(base + '/academy.html');
   await page.locator('.section-card').first().waitFor();
-  if (await page.locator('.section-card').count() !== 7) { throw new Error('Overview section count'); }
+  if (await page.locator('.section-card').count() !== 12) { throw new Error('Overview section count'); }
   var card = page.locator('.section-card').filter({ hasText: 'Adaptive Context' });
   if (!(await card.innerText()).includes(lessons.length + ' / ' + lessons.length)) { throw new Error('Overview progress mismatch'); }
   await card.click();

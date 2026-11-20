@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build a web page · ICF Academy</title><link rel="stylesheet" href="programming-guide.css">
+</head>
+<body>
+  <main>
+    <nav aria-label="Academy navigation"><a href="academy.html">Academy</a> · <a href="index.html#setup">Download and use offline</a></nav>
+    <h1>Build a seat booking page</h1>
+    <p>Make a page where a learner can book a study seat. Start with a label and button. Then connect the page to the same ICF runner you use in the Academy.</p>
+    <p><a class="primary-link" href="seat-project/">Open the working project</a></p>
+    <h2>Pick your starting point</h2>
+    <ul>
+      <li><a href="studio.html#js-basic-values">JavaScript Basic</a> starts with your first line of JavaScript.</li>
+      <li><a href="studio.html#js-beginner-project">Beginner checkpoint</a> asks you to check a library request. If you can finish it, try <a href="studio.html#js-intermediate-modules">Intermediate</a>.</li>
+      <li><a href="studio.html#js-intermediate-project">Intermediate checkpoint</a> asks you to wait for a lookup and handle errors. If you can finish it, try <a href="studio.html#js-advanced-test-table">Advanced</a> or go straight to <a href="studio.html#stage-contract">Build Every Stage</a>.</li>
+    </ul>
+    <h2>Set up your copy</h2>
+    <p>Download the Academy files while you have internet access. After that, all the files for this project are on your computer. Follow the <a href="index.html#setup">offline setup guide</a> and start the local server with <code>node serve.cjs</code>. Leave that terminal open. In a second terminal or a file manager, copy the <code>seat-project</code> folder to a new folder called <code>my-seat-project</code> beside it. Open <code>http://127.0.0.1:4173/my-seat-project/</code>.</p>
+    <p>Keep the two folders side by side so the project can find <code>Template/</code>. Open the copy in your text editor. The four files to read are <a href="seat-project/index.html">index.html</a>, <a href="seat-project/style.css">style.css</a>, <a href="seat-project/page.mjs">page.mjs</a>, and <a href="seat-project/booking.mjs">booking.mjs</a>. The sample seat list is in <a href="seat-project/seats.json">seats.json</a>.</p>
+
+    <section id="form">
+      <h2>1. Give the form a label and button</h2>
+      <p>Look for the form in <code>index.html</code>. The <code>for</code> on the label matches the <code>id</code> on the input. The <code>name</code> is how JavaScript looks up what the learner typed.</p>
+      <pre><code>&lt;label for="seat"&gt;Seat ID&lt;/label&gt;
+&lt;input id="seat" name="seatId"&gt;
+&lt;button type="submit"&gt;Book a seat&lt;/button&gt;</code></pre>
+      <p>Change the label to “Which seat?”. Reload and click the label. The cursor should move to the field. Then press Tab to reach the next control. <a href="studio.html#web-form">Practice the form in Studio</a>.</p>
+    </section>
+    <section id="style">
+      <h2>2. Make it fit a phone</h2>
+      <p>Read <code>style.css</code>. The fields fill the space in the form. Padding stays inside their width. The outline shows where you are when you use the keyboard.</p>
+      <pre><code>input { width: 100%; box-sizing: border-box; }
+button:focus-visible { outline: 3px solid #1749a9; }</code></pre>
+      <p>Make the window narrow. Check that the form fits without sideways scrolling. Change the outline color, then press Tab until you reach the button. Keep a color you can see. <a href="studio.html#web-css">Practice the CSS in Studio</a>.</p>
+    </section>
+    <section id="read">
+      <h2>3. Turn the form into data</h2>
+      <p>In <code>page.mjs</code>, find the submit handler. A handler is a function that responds when something happens. This handler keeps the browser on the same page and uses <code>FormData</code> to read the field names.</p>
+      <pre><code>event.preventDefault();
+const fields = new FormData(form);
+console.log(fields.get('seatId'));</code></pre>
+      <p>Add the log after the line that makes <code>fields</code>. Open the browser’s developer tools and choose Console. Enter “ a1 ” with spaces and submit. The log should show the original text. ICF cleans the seat ID later. <a href="studio.html#web-read">Practice reading the form</a>.</p>
+    </section>
+    <section id="feedback">
+      <h2>4. Show a helpful message</h2>
+      <p>Find the element with <code>role="status"</code>. It can announce changes to a screen reader. <code>textContent</code> puts the message there as plain text. Try changing the success message, then try a blank seat ID. Check what people see in both cases.</p>
+      <p>When something breaks, say what you expected first. Read the error in Console. Use the file name and line number to find the code. Change one thing, reload, and try the same input again. <a href="studio.html#web-feedback">Practice showing the answer</a>.</p>
+    </section>
+    <section id="connect">
+      <h2>5. Connect the page to ICF</h2>
+      <p>Follow the import of <code>createBooking</code> from <code>page.mjs</code> into <code>booking.mjs</code>. The page calls the function with the seats it loaded. Each submit then builds a fresh Intent. The six-stage list shows the helper that runs each step.</p>
+      <ol>
+        <li>Book “ a1 ” as Ava. The page should say “Booked A1.” Open “See which steps ran” and check that all six stages passed.</li>
+        <li>Try A1 again. The request should stop in Authorize because the seat is taken.</li>
+        <li>Try B2 as Guest. Permission should fail. Then try B2 as Bo. It should still be free.</li>
+        <li>Try seat Z9. The lookup should fail in AddContext. Try a blank ID. It should fail in Validate.</li>
+      </ol>
+      <p>The seat list and sample member selector are for practice. Bookings reset on reload. For a real app, get the member ID from a signed-in account and save seats in a store that can handle two requests at once. <a href="studio.html#web-project">Try the Studio project</a> or <a href="index.html#build">build the full feature from scratch</a>.</p>
+    </section>
+    <section id="http">
+      <h2>See how the page loads JSON over HTTP</h2>
+      <p>Open the Network tab in your browser tools and reload. Find <code>seats.json</code> and check its status and response. A 200 status means the file loaded. The response text is JSON. The page reads it with <code>response.json()</code>.</p>
+      <p>In your copy, change the fetch path to a file that does not exist. Reload. The Network tab should show 404 and the page should show an error. Restore the path, add <code>"C3"</code> to the seats list, and check that you can book the new seat. <a href="studio.html#js-intermediate-http">Practice handling an HTTP response</a>.</p>
+    </section>
+    <section id="git">
+      <h2>Save a checkpoint with Git</h2>
+      <p>Install Git while you have internet access if you want to use it offline later. Open a terminal inside your <code>my-seat-project</code> folder. Use these commands there. <code>git init</code> sets up Git in the project folder if it does not have a repository yet.</p>
+      <pre><code>git init
+git status
+git add index.html style.css page.mjs booking.mjs seats.json
+git diff --cached
+git commit -m "Build seat booking page"
+git log -1 --oneline</code></pre>
+      <p>A commit is a saved version of your files. If Git asks for your name or email, use <code>git config user.name "Your name"</code> and <code>git config user.email "you@example.com"</code> inside this folder, then retry the commit. Use <code>git diff</code> to see what changed after your next edit. Everything here can run on your computer without sending your files anywhere. <a href="studio.html#js-intermediate-git">Practice the commands in Studio</a>.</p>
+    </section>
+    <section id="next">
+      <h2>Build a small change on your own</h2>
+      <p>Add a second seat label or a new room to the project. Before coding, list one request that should pass and two that should fail. Run those requests, read the steps, and record what you saw. Try the <a href="studio.html#js-advanced-project">last-seat challenge</a> when you want to test retries and two people booking at once.</p>
+    </section>
+  </main>
+</body>
+</html>

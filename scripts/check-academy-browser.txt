@@ -37,7 +37,7 @@ async function(page){
   await page.setViewportSize({width:1440,height:900});await page.screenshot({path:'output/playwright/unified-orientation.png'});
   await page.setViewportSize({width:390,height:844});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile orientation overflow');
   await page.goto(base+'/studio.html#roblox-project');if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile project overflow');
-  await page.goto(base+'/academy.html');if(await page.locator('.section-card').count()!==7)throw new Error('Overview section count');
+  await page.goto(base+'/academy.html');if(await page.locator('.section-card').count()!==12)throw new Error('Overview section count');
   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile overview overflow');
   const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export progress',exact:true}).click();const download=await downloadPromise;await download.saveAs('output/playwright/unified-progress.json');
   await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'output/playwright/unified-overview.png',fullPage:true});

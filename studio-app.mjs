@@ -115,7 +115,7 @@ function render() {
   $('lessonInstructions').replaceChildren(...item.instructions.map(text=>node('li',text)));
   $('lessonHint').textContent=item.hint;
   $('lessonReflection').textContent=item.reflection;
-  const reading=wikiByActivity.get(item.id);
+  const reading=wikiByActivity.get(item.id)||wikiReadings.get(item.wiki);
   $('wikiLink').href=reading?'index.html#lesson/'+reading.id:'index.html';
   $('wikiReadingTitle').textContent=reading?reading.title:'Browse topics';
   $('sourceLink').href=item.source;
