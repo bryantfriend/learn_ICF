@@ -31,17 +31,17 @@ export const recipeGroups = [
   {
     id: "foundations", title: "First Intents",
     examples: [
-      example("create-fresh-intents", "Keep two borrowers’ requests separate",
-        "Create two demo requests in memory. Add a fact to the first request and inspect both.", demo + `
+      example("create-fresh-intents", "Keep two requests separate",
+        "Make one request for Ava and one for Bo. Add a receipt to Ava’s request, then check Bo’s.", demo + `
 var ava = demo.createDemoIntent({ id: "ava", role: "member" }, { bookId: "atlas" });
 var bo = demo.createDemoIntent({ id: "bo", role: "member" }, { bookId: "poems" });
 ava.context.receipt = "A17";
 console.log(ava.payload.bookId, bo.payload.bookId);
 console.log(Object.hasOwn(bo.context, "receipt"));`,
-        "The two lines print “atlas poems” and “false”. The second request has its own empty context.",
-        "Call the factory for every action and supply a fresh payload. A shallow copy of a previous working Intent can retain its borrower’s data.", demoSource, "intent-envelope"),
-      example("run-startup-demo", "Smoke-test an installation",
-        "Check startup wiring after you copy the template. Use DemoIntent and a single system actor.", registry + runner + use("intents", template + "Intents/intents.js") + `
+        "The first line is “atlas poems”. The second is “false”. Bo’s request has no receipt yet.",
+        "Make a new Intent for every request. If you reuse Ava’s request, Bo may get some of her details.", demoSource, "intent-envelope"),
+      example("run-startup-demo", "Check that ICF is set up",
+        "After copying the template, run DemoIntent with a sample user named setup.", registry + runner + use("intents", template + "Intents/intents.js") + `
 var registered = intents.registerProjectIntents();
 if (!registered.ok) throw new Error(registered.errors.join(" "));
 var made = registry.createIntent("DemoIntent", { id: "setup", role: "system" }, {});
@@ -49,10 +49,10 @@ if (!made.ok) throw new Error(made.errors.join(" "));
 var result = await pipeline.run(made.intent);
 if (!result.ok) throw new Error(result.errors.join(" "));
 console.log(result.data.demoProcessed, result.events[0].type);`,
-        "After the step logs, the final line prints “true DemoIntentCompleted”.",
-        "A single smoke test here checks registration, construction, all six groups, result projection, and event production.", template + "Intents/intents.js", "first-run"),
-      example("public-response", "Return a small API response",
-        "Format a sample successful purchase result for the buyer. The working Intent also contains an internal stock count.", `
+        "After the step logs, the last line is “true DemoIntentCompleted”.",
+        "This quick test checks that the app can make the Intent, run all six steps, and return an event.", template + "Intents/intents.js", "first-run"),
+      example("public-response", "Show only what the buyer needs",
+        "Take a sample purchase result and build a reply for the buyer.", `
 var result = {
   ok: true,
   intent: { context: { internalStock: 17 } },
@@ -63,24 +63,24 @@ function orderResponse(success) {
   return { id: success.data.orderId, totalCents: success.data.totalCents };
 }
 console.log(JSON.stringify(orderResponse(result)));`,
-        'The public response is {"id":"O17","totalCents":4200}.',
-        "Select public fields after the success check. The full execution envelope can carry service objects, private context, and evidence that a client should never receive.", runnerSource, "result-envelope")
+        "The reply includes order ID O17 and a total of 4200 cents.",
+        "A buyer needs their order details. Keep facts like the store’s stock count inside the app.", runnerSource, "result-envelope")
     ]
   },
   {
     id: "validate", title: "Validate",
     examples: [
-      example("check-store-id", "Reject a missing store ID",
-        "Call the template’s store validator with an empty payload, then try a payload containing storeId.", use("validators", stages + "Validators/validators.js") + `
+      example("check-store-id", "Catch a missing store ID",
+        "Try the same check with no store ID and then with a store ID.", use("validators", stages + "Validators/validators.js") + `
 var check = validators.exampleRequireStoreId;
 var missing = await check.run({ payload: {} });
 var present = await check.run({ payload: { storeId: "north" } });
 console.log(missing.errors[0]);
 console.log(present.ok);`,
-        "The error reads “Missing required field: intent.payload.storeId.” The supplied ID returns true.",
-        "A factory-built validator exposes run. This particular helper checks presence. A later provider must establish which store the ID actually identifies.", stages + "Validators/Core/exampleRequireStoreId.js", "validate"),
-      example("validate-quantity", "Accept whole quantities from 1 to 12",
-        "Build a reserve-stock validator and test the maximum quantity, a fraction, a numeric string, and zero.", use("{ createValidator }", template + "StageFactories/createValidator.js") + `
+        "The first run says “Missing required field: intent.payload.storeId.” The second prints true.",
+        "Check required fields early so you can tell the user exactly what to fix.", stages + "Validators/Core/exampleRequireStoreId.js", "validate"),
+      example("validate-quantity", "Allow whole numbers from 1 to 12",
+        "Test a stock request with 12, a fraction, a number written as text, and zero.", use("{ createValidator }", template + "StageFactories/createValidator.js") + `
 var quantityCheck = createValidator({
   id: "quantity", name: "Reservation quantity",
   description: "Require one to twelve whole units.",
@@ -94,10 +94,10 @@ for (var n of [12, 2.5, "2", 0]) {
   var result = await quantityCheck.run({ payload: { quantity: n } });
   console.log(JSON.stringify(n), result.ok);
 }`,
-        "The four results are true, false, false, and false.",
-        "Validate the representation promised by the request contract. If a form is meant to accept numeric text, give that input its own validation and normalization rules.", template + "StageFactories/createValidator.js", "stage-factories"),
-      example("collect-errors", "Report two form errors together",
-        "Write a plain Validate step for a workshop sign-up. Submit a blank name with an invalid seat count.", `
+        "The results in order are true, false, false, and false.",
+        "A value can look like a number and still be text. Write down which types and values you accept.", template + "StageFactories/createValidator.js", "stage-factories"),
+      example("collect-errors", "Show two form errors at once",
+        "Submit a workshop form with no name and an invalid seat count.", `
 function validateBooking(intent) {
   var payload = intent.payload || {};
   var errors = [];
@@ -108,42 +108,42 @@ function validateBooking(intent) {
 }
 var result = validateBooking({ payload: { name: " ", seats: 0 } });
 console.log(result.errors.join(" "));`,
-        "The result prints “Enter a name. Choose at least one seat.”",
-        "Collect independent input errors inside a single helper so the visitor can correct the form in one pass. The runner stops when that helper reports failure.", template + "engine/resultHelpers.js", "validate")
+        "The output is “Enter a name. Choose at least one seat.”",
+        "Show both problems so the person can fix them in one try.", template + "engine/resultHelpers.js", "validate")
     ]
   },
   {
     id: "normalize", title: "Normalize",
     examples: [
-      example("parse-opt-in", "Read a text checkbox correctly",
-        "A form sends “ NO ”, “yes”, or an unknown word for a checkbox. Use the built-in boolean normalizer.", normalize + `
+      example("parse-opt-in", "Turn yes and no into true and false",
+        "Try sending “ NO ”, “yes”, and an unknown word from a checkbox form.", normalize + `
 var parseOptIn = normalizers.createNormalizePayloadBooleanFieldNormalizer("optIn");
 for (var text of [" NO ", "yes", "sometimes"]) {
   var result = parseOptIn({ payload: { optIn: text } });
   if (result.ok) console.log(result.intent.payload.optIn);
   else console.log(result.errors[0]);
 }`,
-        "The first two lines print false and true. The third reports that optIn could not be converted to a boolean.",
-        "JavaScript treats every nonempty string as truthy, including “false”. Parse the explicit spellings that your form accepts.", stages + "Normalizers/Core/normalizePayloadBooleanField.js", "normalize"),
-      example("parse-price", "Convert a price field while preserving zero",
-        "Normalize the strings “0” and “12.50” and try a field containing letters.", normalize + `
+        "The first two print false and true. The third says the app could not read optIn as true or false.",
+        "Use a clear rule for text from forms. JavaScript treats any nonempty text as true, including the word “no”.", stages + "Normalizers/Core/normalizePayloadBooleanField.js", "normalize"),
+      example("parse-price", "Read prices, including zero",
+        "Try “0”, “12.50”, and a price with letters.", normalize + `
 var parsePrice = normalizers.createNormalizePayloadNumberFieldNormalizer("price");
 for (var raw of ["0", "12.50", "ten"]) {
   var result = parsePrice({ payload: { price: raw } });
   if (result.ok) console.log(typeof result.intent.payload.price, result.intent.payload.price);
   else console.log(result.errors[0]);
 }`,
-        "The first two values become the numbers 0 and 12.5. The third produces a conversion error for price.",
-        "Conversion and domain limits are separate responsibilities. A currency feature must also specify its accepted precision, bounds, and storage unit.", stages + "Normalizers/Core/normalizePayloadNumberField.js", "normalize"),
-      example("canonical-due-time", "Canonicalize a due time with its offset",
-        "A scheduler submits 09:30 in UTC+06:00. Convert it to the ISO representation the calendar stores.", normalize + `
+        "The first two become the numbers 0 and 12.5. The last prints an error for price.",
+        "Zero is a price. Check for missing values separately so a free item is still valid.", stages + "Normalizers/Core/normalizePayloadNumberField.js", "normalize"),
+      example("canonical-due-time", "Put a due time in one standard format",
+        "Convert a local time of 09:30 in UTC+06:00 to UTC, a time standard the calendar uses.", normalize + `
 var normalizeDue = normalizers.createNormalizePayloadDateFieldNormalizer("due");
 var result = normalizeDue({ payload: { due: "2026-11-20T09:30:00+06:00" } });
 console.log(result.intent.payload.due);`,
-        "The resulting timestamp is 2026-11-20T03:30:00.000Z.",
-        "The explicit offset identifies an instant. If a feature accepts a date without a time, define a separate date-only contract to protect the user’s calendar day.", stages + "Normalizers/Core/normalizePayloadDateField.js", "normalize"),
-      example("preserve-input", "Normalize a label without changing the original",
-        "Write a plain Normalize step for a form draft shared with a preview panel. Keep other fields and the unedited draft.", `
+        "The printed time is 2026-11-20T03:30:00.000Z.",
+        "Keep the time zone when you read the input so the same deadline shows up at the right time everywhere.", stages + "Normalizers/Core/normalizePayloadDateField.js", "normalize"),
+      example("preserve-input", "Clean up a label and keep the original",
+        "Trim the label in a copy of a draft. The preview still uses the old draft.", `
 function normalizeLabel(intent) {
   var payload = { ...intent.payload, label: intent.payload.label.trim() };
   return { ok: true, intent: { ...intent, payload: payload } };
@@ -151,15 +151,15 @@ function normalizeLabel(intent) {
 var draft = { payload: { label: "  Books  ", color: "blue" }, context: {} };
 var next = normalizeLabel(draft).intent;
 console.log(JSON.stringify([draft.payload.label, next.payload.label, next.payload.color]));`,
-        'The output is ["  Books  ","Books","blue"].',
-        "After Validate establishes a string, copying both the envelope and the changed payload preserves the draft. The successful step explicitly returns the updated Intent.", runnerSource, "stage-contracts")
+        "The original label keeps its spaces. The new label is Books. Its color stays blue.",
+        "Copy the fields you want to keep, and change only the label in the copy.", runnerSource, "stage-contracts")
     ]
   },
   {
     id: "add-context", title: "AddContext",
     examples: [
-      example("lookup-catalog-price", "Load a trusted price for a free item",
-        "Use a local catalog as the trusted lookup. Compare a free guide with an unknown item.", `
+      example("lookup-catalog-price", "Look up the price of a free item",
+        "Check the store’s own price list for a free guide and an item that is missing.", `
 var catalog = new Map([["guide", 0], ["atlas", 1200]]);
 function loadPrice(intent) {
   var sku = intent.payload.sku;
@@ -170,48 +170,48 @@ function loadPrice(intent) {
 var free = loadPrice({ payload: { sku: "guide", priceCents: 600 }, context: {} });
 var missing = loadPrice({ payload: { sku: "map" }, context: {} });
 console.log(free.intent.context.priceCents, missing.errors[0]);`,
-        "The free guide has price 0 and the unknown SKU reports “Unknown catalog item.”",
-        "Check membership in the catalog explicitly. A zero price is valid, and a posted price never establishes the authoritative cost.", "studio-course.mjs", "add-context"),
-      example("verified-learner", "Load an identity by actor ID",
-        "Use the included lesson identity fixture to compare the known learner with an unknown one.", services + use("providers", stages + "ContextProviders/contextProviders.js") + `
+        "The free guide costs 0. The missing item returns “Unknown catalog item.”",
+        "Look up the item first. A price of zero does not mean the item is missing.", "studio-course.mjs", "add-context"),
+      example("verified-learner", "Check who the learner is",
+        "Try the sample lookup with a known learner ID and a made-up ID.", services + use("providers", stages + "ContextProviders/contextProviders.js") + `
 var load = providers.createLessonContextProvider(createDemoLessonServices());
 for (var id of ["learner", "missing"]) {
   var result = await load({ actor: { id: id }, context: {} });
   if (result.ok) console.log(result.intent.context.learner.scope);
   else console.log(result.errors[0]);
 }`,
-        "The known learner has scope course-1. The unknown ID produces “Verified learner identity required.”",
-        "Resolve the authenticated actor against a trusted service and check the returned identity before attaching it. The fixed lookup in this example is a teaching fixture.", stages + "ContextProviders/Domain/adaptiveContext/addLessonContext.js", "add-context"),
-      example("rank-optional-signals", "Explain a negative score contribution",
-        "Score a project with a base of 80 when repeated errors are present and the session-length signal is missing.", use("{ scoreContextCandidate }", adaptiveSource) + `
+        "The known learner belongs to course-1. The other ID gives “Verified learner identity required.”",
+        "Use the learner record the app looked up. An ID by itself does not prove the person has access.", stages + "ContextProviders/Domain/adaptiveContext/addLessonContext.js", "add-context"),
+      example("rank-optional-signals", "See why a score went down",
+        "Give a project a starting score of 80. Add the recent mistakes clue and leave session length blank.", use("{ scoreContextCandidate }", adaptiveSource) + `
 var rule = { baseScore: 80, factors: { repeatedErrors: -20, shortSession: -25 } };
 var scored = scoreContextCandidate(rule, { repeatedErrors: 1 });
 console.log(scored.score);
 console.table(scored.contributions);`,
-        "The score is 60. Repeated errors contribute −20 and the missing shortSession signal contributes zero.",
-        "Compute from the base each time. The trace lets a reader distinguish a missing observation from an observed negative contribution.", adaptiveSource, "evidence-scores"),
-      example("source-metadata", "Carry the request source into context",
-        "Identify requests submitted by a scheduled job using source metadata set by the job.", use("providers", stages + "ContextProviders/contextProviders.js") + `
+        "The score is 60. Recent mistakes take away 20 points. The missing clue adds zero.",
+        "Read each clue’s points to find out what moved the score.", adaptiveSource, "evidence-scores"),
+      example("source-metadata", "Record where a request came from",
+        "Have a scheduled job name itself when it makes a request. Copy that name into context.", use("providers", stages + "ContextProviders/contextProviders.js") + `
 var intent = { meta: { source: "nightly-job" }, context: {} };
 var result = providers.addSourceContext(intent);
 console.log(result.intent.context.source);`,
-        "The context source is nightly-job.",
-        "This helper copies metadata. Use it for attribution and diagnostics. Permissions require independently verified identity and policy.", stages + "ContextProviders/Core/addSourceContext.js", "add-context")
+        "The source in context is nightly-job.",
+        "The source can help you find the part of the app that started the request.", stages + "ContextProviders/Core/addSourceContext.js", "add-context")
     ]
   },
   {
     id: "authorize", title: "Authorize",
     examples: [
-      example("check-context-role", "Allow an editor to publish",
-        "Assume AddContext verified each account’s role. Try the existing authorizer with an editor and a viewer.", authorize + `
+      example("check-context-role", "Let an editor publish",
+        "Try the permission check with two roles the app has already looked up. One person is an editor and one is a viewer.", authorize + `
 var publish = authorizers.createRequireContextRoleAuthorizer(["editor", "admin"]);
 var editor = publish({ context: { actorRole: "editor" } });
 var viewer = publish({ context: { actorRole: "viewer" } });
 console.log(editor.ok, viewer.ok, viewer.errors[0]);`,
-        "The editor passes. The viewer fails with “Context role is not authorized: viewer.”",
-        "Use the verified context role for this decision. Copying a posted claim into context would give that claim the appearance of authority.", stages + "Authorizers/Core/requireContextRole.js", "authorize"),
-      example("verify-draft-owner", "Protect a draft by owner and status",
-        "Write a plain Authorize step. Try the owner’s editable draft, another person’s draft, and a published draft.", `
+        "The editor passes. The viewer gets “Context role is not authorized: viewer.”",
+        "Use the role the app checked. A person should not be able to claim they are an editor in their request.", stages + "Authorizers/Core/requireContextRole.js", "authorize"),
+      example("verify-draft-owner", "Check who can edit a draft",
+        "Try to edit your own open draft, someone else’s draft, and a draft that was already published.", `
 function allowEdit(intent) {
   var draft = intent.context.draft;
   if (!draft || draft.ownerId !== intent.actor.id || draft.status !== "draft") {
@@ -226,24 +226,24 @@ for (var draft of [
 ]) {
   console.log(allowEdit({ actor: { id: "ava" }, context: { draft: draft } }).ok);
 }`,
-        "The three cases print true, false, and false.",
-        "Combine actor and resource checks using the loaded draft. If status can change concurrently, the storage mutation also needs to check the expected state at commit.", "studio-course.mjs", "authorize"),
-      example("require-subscription", "Require an active subscription",
-        "A subscription service supplies a verified status. Compare active, paused, and missing context values.", authorize + `
+        "The results in order are true, false, and false.",
+        "Check who owns the draft and whether it is still open for edits.", "studio-course.mjs", "authorize"),
+      example("require-subscription", "Check for an active subscription",
+        "Try an active account, a paused account, and an account with no saved status.", authorize + `
 var requireActive = authorizers.createRequireContextValueAuthorizer("subscription", "active");
 for (var context of [{ subscription: "active" }, { subscription: "paused" }, {}]) {
   var result = requireActive({ context: context });
   console.log(result.ok ? "Allowed" : result.errors[0]);
 }`,
-        "Active prints “Allowed”. The other two report a value mismatch and a missing required value respectively.",
-        "A missing fact and a known ineligible state can both deny a request while producing different diagnostic evidence.", stages + "Authorizers/Core/requireContextValue.js", "authorize")
+        "Active prints “Allowed”. The other two get errors. One status is wrong and one is missing.",
+        "A clear error tells you whether the account failed the rule or the app could not find the information.", stages + "Authorizers/Core/requireContextValue.js", "authorize")
     ]
   },
   {
     id: "process", title: "Process",
     examples: [
-      example("reserve-last-copy", "Reserve the last copy in a fixture",
-        "Write a plain Process step with a synchronous in-memory stock fixture. Run two requests against one available copy.", `
+      example("reserve-last-copy", "Save only one loan for the last copy",
+        "Start with one copy in a sample store. Ask for it twice.", `
 var stock = new Map([["atlas", 1]]);
 function reserve(intent) {
   var sku = intent.payload.sku;
@@ -259,20 +259,20 @@ for (var attempt of [1, 2]) {
   var result = reserve({ payload: { sku: "atlas" }, context: {} });
   console.log(attempt, result.ok, stock.get("atlas"));
 }`,
-        "Attempt 1 prints true and 0 remaining. Attempt 2 prints false and 0 remaining.",
-        "Make the availability decision next to the mutation. This synchronous fixture models the behavior for one process. A shared database requires an atomic conditional write or transaction.", "studio-course.mjs", "transactions"),
-      example("choose-next-lesson", "Turn selected evidence into a lesson",
-        "Pass one selected evidence record and a policy version to the actual lesson processor.", use("{ processLessonRecommendation }", stages + "Processors/Domain/adaptiveContext/processLessonRecommendation.js") + `
+        "The first request works and leaves zero copies. The second fails and still leaves zero copies.",
+        "Check the count again as part of the write. An earlier check may be out of date.", "studio-course.mjs", "transactions"),
+      example("choose-next-lesson", "Turn the winning choice into a lesson",
+        "Give Process one winning choice with ID gap, score 95, and rule version 3.", use("{ processLessonRecommendation }", stages + "Processors/Domain/adaptiveContext/processLessonRecommendation.js") + `
 var context = { adaptiveContext: {
   policyVersion: 3,
   selected: [{ id: "gap", score: 95, candidate: { value: { lessonId: "prerequisite-review" } } }]
 } };
 var result = processLessonRecommendation({ context: context });
 console.log(JSON.stringify(result.intent.context.resultData));`,
-        'The result contains lessonId “prerequisite-review”, evidenceId “gap”, score 95, and policyVersion 3.',
-        "Selecting evidence does not yet answer the caller’s question. Process expresses the domain rule that maps the first selected record to a particular lesson.", stages + "Processors/Domain/adaptiveContext/processLessonRecommendation.js", "decision-traces"),
-      example("idempotent-credit", "Recognize a repeated credit award",
-        "Put an operation key and amount into a single-learner, in-memory Process fixture. Try a retry and a conflicting reuse of the key.", `
+        "The answer is prerequisite-review. It also includes gap, 95, and version 3.",
+        "Process turns the choice into the result the learner sees. Keep the choice ID so you can explain the answer later.", stages + "Processors/Domain/adaptiveContext/processLessonRecommendation.js", "decision-traces"),
+      example("idempotent-credit", "Keep a retry from adding points twice",
+        "Give a learner five points with an award ID. Repeat the request, then try using the same ID for a different amount.", `
 var balance = 0;
 var applied = new Map();
 function award(intent) {
@@ -291,15 +291,15 @@ function award(intent) {
 for (var points of [5, 5, 8]) {
   console.log(award({ payload: { key: "lesson-17", points: points }, context: {} }).ok, balance);
 }`,
-        "The results are true/5, true/5, and false/5. A repeated award leaves the balance at 5.",
-        "Identify the domain operation across submissions. In a multi-user store, scope keys by actor and action, and persist the key, write, and original result in one transaction.", "studio-course.mjs", "retries")
+        "The first two calls report success and leave the balance at 5. The third fails and leaves it at 5.",
+        "Save the result with the award ID. A repeat can return the old answer without adding more points.", "studio-course.mjs", "retries")
     ]
   },
   {
     id: "emit", title: "Emit",
     examples: [
-      example("append-stock-event", "Append an inventory event",
-        "Build an emitter for a confirmed stock change. Start with one existing event to see how ordering is preserved.", emit + `
+      example("append-stock-event", "Add an event after stock changes",
+        "Start with an earlier event. Then add the event for the new stock hold.", emit + `
 var addEvent = emitters.createAddEventEmitter("StockReserved", { channel: "catalog" });
 var intent = {
   type: "ReserveStockIntent", actor: { id: "desk", role: "staff" },
@@ -308,18 +308,18 @@ var intent = {
 var events = addEvent(intent).intent.context.events;
 console.log(events.map(function type(event) { return event.type; }).join(", "));
 console.log(events[1].data.actorId, events[1].data.channel);`,
-        "The lines print “EarlierEvent, StockReserved” and “desk catalog”.",
-        "The template builds an event record and appends it to the envelope. A consumer or delivery adapter must deliver the record when an external notification is required.", stages + "Emitters/Core/addEvent.js", "emit"),
-      example("add-receipt-message", "Add a receipt message without losing the order ID",
-        "Add a message for a receipt panel to result data already written by Process.", emit + `
+        "The events print in order as “EarlierEvent, StockReserved”. The next line is “desk catalog”.",
+        "Add the new event to the list so earlier messages stay in order.", stages + "Emitters/Core/addEvent.js", "emit"),
+      example("add-receipt-message", "Add a note to a receipt",
+        "Start with a saved order ID. Add the text you want the buyer to see.", emit + `
 var addMessage = emitters.createAddResultMessageEmitter("receiptMessage", "Order confirmed.");
 var intent = { context: { resultData: { orderId: "O17" } } };
 var result = addMessage(intent);
 console.log(JSON.stringify(result.intent.context.resultData));`,
-        'The output is {"orderId":"O17","receiptMessage":"Order confirmed."}.',
-        "This emitter preserves existing result fields. The UI can decide how to present the message after it receives the completed result.", stages + "Emitters/Core/addResultMessage.js", "emit"),
-      example("retry-receipt", "Retry a pending receipt",
-        "A loan already exists. Use its pending receipt record and simulate a failed delivery, a successful retry, and a repeated delivery request.", `
+        "The reply still has order O17, plus “Order confirmed.”",
+        "Add the new field and keep the result Process already built.", stages + "Emitters/Core/addResultMessage.js", "emit"),
+      example("retry-receipt", "Resend a receipt without making a new loan",
+        "Start with a loan that already exists. Make the first send fail, the second work, and the third repeat the request.", `
 var receipt = { id: "receipt-52", loanId: "loan-52", delivered: false };
 var attempts = 0;
 async function send(record) {
@@ -337,25 +337,25 @@ async function deliver(record) {
 }
 for (var request of [1, 2, 3]) console.log(await deliver(receipt));
 console.log(attempts);`,
-        "The messages are “Delivery unavailable.”, “delivered”, and “already delivered”. There are two actual send attempts.",
-        "Retry the saved event independently of the loan. For real delivery, persist pending records with the commit and deduplicate by event ID at the consumer to handle a crash after sending.", "studio-course.mjs", "retries")
+        "The messages are “Delivery unavailable.”, “delivered”, and “already delivered”. The app tries to send twice.",
+        "Use the saved receipt record. A send error can be fixed without changing the loan again.", "studio-course.mjs", "retries")
     ]
   },
   {
-    id: "composition", title: "Connect a complete feature",
+    id: "composition", title: "Put the steps together",
     examples: [
-      example("named-validation-chain", "Chain two checks and locate the failing one",
-        "Add the store validator after the demo’s built-in shape check and submit a structurally valid request without a store ID.", demo + runner + use("validators", stages + "Validators/validators.js") + `
+      example("named-validation-chain", "Run two checks in order",
+        "Start with the demo’s check for a complete request. Add a check for a store ID. Send a request without the ID.", demo + runner + use("validators", stages + "Validators/validators.js") + `
 var intent = demo.createDemoIntent({ id: "ava", role: "staff" }, {});
 intent.stages.Validate.requireStore = validators.exampleRequireStoreId;
 var result = await pipeline.run(intent);
 console.log(result.meta.pipelineTrace.map(function row(step) {
   return step.step + "=" + step.ok;
 }).join(", "));`,
-        "The final line is “requireBaseIntentShape=true, requireStore=false”.",
-        "The keys in the stage map become the trace’s step labels. Distinct names let you pinpoint a specific rejection inside one stage.", runnerSource, "intent-declarations"),
-      example("publish-policy", "Publish an editor’s policy update",
-        "Raise the minimum score to 55 in the in-memory lesson policy. Run the actual update Intent with a verified fixture editor.", services + use("{ createContextPolicyUpdateFactory }", updateSource) + runner + `
+        "The first check passes. The second prints requireStore=false.",
+        "Name each check so the trace tells you which rule to look at.", runnerSource, "intent-declarations"),
+      example("publish-policy", "Let an editor change the scoring rules",
+        "Use a sample editor account the app can check. Raise the minimum score to 55.", services + use("{ createContextPolicyUpdateFactory }", updateSource) + runner + `
 var adapters = createDemoLessonServices();
 var proposal = await adapters.policyStore.read();
 proposal.minimumScore = 55;
@@ -366,10 +366,10 @@ var request = create({ id: "editor", role: "editor" }, {
 var result = await pipeline.run(request);
 if (!result.ok) throw new Error(result.errors.join(" "));
 console.log(result.data.policyVersion, (await adapters.policyStore.read()).minimumScore);`,
-        "The last line is “2 55”. The policy change went through Validate, Normalize, AddContext, Authorize, Process, and Emit.",
-        "Submit the reviewed change with an expected version and a reason. A durable project adapter must compare the version and advance the active policy atomically.", updateSource, "policy-updates"),
-      example("compare-recommendations", "Compare two complete recommendation runs",
-        "Run the same learner request once with no signals and once with repeated errors and a short session.", services + use("{ createLessonRecommendationFactory }", template + "Intents/RecommendNextLessonIntent.js") + runner + `
+        "The last line is “2 55”. It shows version 2 and a minimum score of 55.",
+        "Changing shared rules is an action too. Give it clear checks and a result people can read.", updateSource, "policy-updates"),
+      example("compare-recommendations", "Compare two lesson picks",
+        "Ask for a lesson with no clues. Then add recent mistakes and a short session.", services + use("{ createLessonRecommendationFactory }", template + "Intents/RecommendNextLessonIntent.js") + runner + `
 for (var signals of [{}, { repeatedErrors: 1, shortSession: 1 }]) {
   var adapters = createDemoLessonServices({ signals: signals });
   var create = createLessonRecommendationFactory(adapters);
@@ -377,10 +377,10 @@ for (var signals of [{}, { repeatedErrors: 1, shortSession: 1 }]) {
   if (!result.ok) throw new Error(result.errors.join(" "));
   console.log(result.data.lessonId, result.data.score);
 }`,
-        "The selected lessons are advanced-project at 80 and prerequisite-review at 95.",
-        "Vary only the captured signals to explain the decision change. The identity lookup, policy version, clock, authorization rule, and candidate revisions stay comparable.", lessonServicesSource, "adaptive-context"),
-      example("register-feature", "Register a named feature at startup",
-        "Use a template demo factory as the wiring for a small readiness-check feature. Register, create, and run its own type.", demo + registry + runner + `
+        "Without clues, advanced-project wins with 80. With both clues, prerequisite-review wins with 95.",
+        "Keep the rule version the same. That lets you see what changed because of the clues.", lessonServicesSource, "adaptive-context"),
+      example("register-feature", "Teach the app a new Intent name",
+        "Register ReadinessCheckIntent using the demo’s steps. Then create and run it by name.", demo + registry + runner + `
 function createReadinessCheck(actor, payload) {
   var intent = demo.createDemoIntent(actor, payload);
   intent.type = "ReadinessCheckIntent";
@@ -392,31 +392,31 @@ var made = registry.createIntent("ReadinessCheckIntent", { id: "health", role: "
 if (!made.ok) throw new Error(made.errors.join(" "));
 var result = await pipeline.run(made.intent);
 console.log(result.ok, result.intent.type, result.data.demoProcessed);`,
-        "The final line reads “true ReadinessCheckIntent true”. This wiring example deliberately uses the demo’s processing and events.",
-        "Keep the registry key and factory result type consistent. A real feature supplies its domain-specific stages and event names in its declaration.", registrySource, "intent-registry")
+        "The last line reads “true ReadinessCheckIntent true”.",
+        "The registry links an action name to the function that makes it. This sample reuses the demo steps.", registrySource, "intent-registry")
     ]
   },
   {
     id: "failures", title: "Diagnose common failures",
     examples: [
-      example("unknown-intent", "Distinguish an unknown type from a denied request",
-        "In a fresh process, ask the empty registry to create a checkout that startup has never registered.", registry + `
+      example("unknown-intent", "Find an Intent the app does not know",
+        "Start with an empty registry. Ask it to make CheckoutIntent before you register it.", registry + `
 var made = registry.createIntent("CheckoutIntent", { id: "ava", role: "member" }, {});
 console.log(made.ok, made.errors[0]);
 console.log(registry.listIntentTypes().length);`,
-        "The result reports “Intent is not registered: CheckoutIntent.” The registry has zero entries.",
-        "Start with the registration list when creation fails. A permission rule can only run after a valid Intent has been constructed.", registrySource, "intent-registry"),
-      example("missing-group", "Diagnose an empty pipeline trace",
-        "Remove the Emit group from a fresh teaching fixture and inspect the resulting preflight failure.", demo + runner + `
+        "The app says “Intent is not registered: CheckoutIntent.” The list has zero entries.",
+        "Check registration before you look for a problem in a stage. No stage ran here.", registrySource, "intent-registry"),
+      example("missing-group", "Find a missing stage before anything runs",
+        "Remove Emit from a sample Intent. Run it and look at the error and trace.", demo + runner + `
 var intent = demo.createDemoIntent({ id: "ava", role: "member" }, {});
 delete intent.stages.Emit;
 var result = await pipeline.run(intent);
 console.log(result.stage, result.meta.pipelineTrace.length);
 console.log(result.errors[0]);`,
-        "The stage is Pipeline, trace length is 0, and the error identifies the missing Emit group.",
-        "A zero-length trace means no step ran. Restore a named Emit step, using the template’s explicit pass-through helper when the feature has no feedback.", runnerSource, "failure-traces"),
-      example("bare-boolean", "Repair a helper that returns a bare boolean",
-        "Run the same demo with a broken plain Normalize step and its repaired version.", demo + runner + `
+        "The error names Emit. The stage says Pipeline and the trace has zero steps.",
+        "An empty trace can mean the runner stopped before it called any helper.", runnerSource, "failure-traces"),
+      example("bare-boolean", "Fix a step that returns only true or false",
+        "Run a broken Normalize step, then run the same request after fixing its return value.", demo + runner + `
 function broken() { return true; }
 function repaired(intent) { return { ok: true, intent: intent }; }
 for (var normalizeStep of [broken, repaired]) {
@@ -425,10 +425,10 @@ for (var normalizeStep of [broken, repaired]) {
   var result = await pipeline.run(intent);
   console.log(result.ok ? "Reached Emit" : result.stage + "." + result.step);
 }`,
-        "The first run prints Normalize.cleanInput. The repaired run prints “Reached Emit”.",
-        "A named plain function must return an object containing ok. Factories can support other callback forms because the wrapper translates those forms into the runner’s contract.", runnerSource, "stage-contracts"),
-      example("denied-write-count", "Prove a denied feature made zero writes",
-        "Attach a write counter to Process and use the template’s explicit denial step in Authorize.", demo + runner + authorize + `
+        "The first run stops at Normalize.cleanInput. The fixed run prints “Reached Emit”.",
+        "A plain step must return an object so the runner knows what to do next.", runnerSource, "stage-contracts"),
+      example("denied-write-count", "Check that a denied request saves nothing",
+        "Count calls to Process. Make Authorize deny the request.", demo + runner + authorize + `
 var writes = 0;
 var intent = demo.createDemoIntent({ id: "ava", role: "member" }, {});
 intent.stages.Authorize = { featureClosed: authorizers.deny };
@@ -440,10 +440,10 @@ intent.stages.Process = {
 };
 var result = await pipeline.run(intent);
 console.log(result.stage, result.step, writes);`,
-        "The final line is “Authorize featureClosed 0”.",
-        "Check observable side effects as well as error fields. A zero write count proves that a rejected request stopped before the mutation.", runnerSource, "test-strategy"),
-      example("inspect-emit-failure", "Prove that a failed receipt followed a commit",
-        "Record one write in a fixture, then make receipt delivery fail inside Emit. Inspect the stored count and failed step.", demo + runner + `
+        "The last line is “Authorize featureClosed 0”. The write count is zero.",
+        "Check the saved data or write count as well as the error. Both matter when the request should stop.", runnerSource, "test-strategy"),
+      example("inspect-emit-failure", "Check whether the loan saved before the receipt failed",
+        "Save one loan. Make Emit fail to send the receipt. Look at the error and the saved loan count.", demo + runner + `
 var store = { loans: 0 };
 var intent = demo.createDemoIntent({ id: "ava", role: "member" }, {});
 intent.stages.Process = {
@@ -458,18 +458,18 @@ intent.stages.Emit = {
 };
 var result = await pipeline.run(intent);
 console.log(result.ok, result.stage, result.step, store.loans);`,
-        "The final line reads “false Emit sendReceipt 1”. The failed overall run still has one recorded loan.",
-        "Inspect the commit before deciding what to retry. Replaying this entire demo would increment the loan counter again.", runnerSource, "retries"),
-      example("expired-evidence", "Find out why no candidate qualified",
-        "Set the trusted lesson fixture clock exactly to the candidates’ expiry time. Run a recommendation and read the exclusion count.", services + runner + use("{ createLessonRecommendationFactory }", template + "Intents/RecommendNextLessonIntent.js") + `
+        "The last line is “false Emit sendReceipt 1”. One loan is in the store even though the run reports failure.",
+        "Find out what already saved before you try again. You may only need to resend the receipt.", runnerSource, "retries"),
+      example("expired-evidence", "Find out why all the choices expired",
+        "Set the sample clock to the exact moment the lesson choices expire. Ask for a recommendation.", services + runner + use("{ createLessonRecommendationFactory }", template + "Intents/RecommendNextLessonIntent.js") + `
 var adapters = createDemoLessonServices();
 adapters.now = function atExpiry() { return 10000; };
 var create = createLessonRecommendationFactory(adapters);
 var result = await pipeline.run(create({ id: "learner", role: "student" }, {}));
 console.log(result.stage, result.step);
 console.log(result.errors[0]);`,
-        "The result reports AddContext.addAdaptiveContext and an exclusion count of expired=3.",
-        "Check eligibility before tuning weights. At the expiry boundary the policy filters all three candidates regardless of their base scores.", template + "examples/runAdaptiveContext.mjs", "evidence-eligibility")
+        "The app stops at AddContext.addAdaptiveContext. The error includes expired=3.",
+        "A choice stops being valid as soon as its expiry time arrives.", template + "examples/runAdaptiveContext.mjs", "evidence-eligibility")
     ]
   }
 ];

@@ -1,7 +1,7 @@
 export const adoptionGuide = [
   {
-    title: "Set up a local project",
-    body: "Start in a local checkout of the academy with Node.js 22 or newer. This command creates a new seat-demo directory, copies the framework, and prepares one domain directory per stage. Run each line in your terminal. Use an empty destination so earlier work stays safe. The last command runs the framework’s own diagnostic fixtures.",
+    title: "Set up the project folder",
+    body: "Start in the main folder of your downloaded wiki with Node.js 22 or later. Run each line in the terminal. The commands make a new seat-demo folder, copy the ICF files, and make a folder for each stage. The last line checks that the demo runs.",
     language: "Terminal · academy checkout",
     source: "Template/README.md",
     code: `node --version
@@ -10,12 +10,12 @@ cd seat-demo
 node ICF/examples/checkPipeline.mjs`
   },
   {
-    title: "Describe the reservation",
-    body: "A member can reserve one available seat by ID. Ava and Bo are the two verified members in this fixture. A1 and B2 start empty. One successful reservation changes one owner and produces one SeatReserved event. A bad ID, an unknown seat, a guest, or an occupied seat must leave ownership intact. Each file path below is relative to seat-demo."
+    title: "Decide what a booking should do",
+    body: "Set up two members, Ava and Bo, and two empty seats, A1 and B2. A good request should book one seat and return a SeatReserved event. A guest, a bad seat ID, or an occupied seat should leave the records alone. The file paths below start in seat-demo."
   },
   {
-    title: "Create the local seating adapter",
-    body: "Save this as seating-store.mjs. Each store starts with the same named members and seats. readFacts returns a copy of the relevant facts. reserveIfFree rechecks the current owner at the point of mutation. A shared database implementation would check and write in one transaction.",
+    title: "Make a small store for seats",
+    body: "Save this as seating-store.mjs. The store starts with the same members and seats each time. readFacts returns the details for one request. reserveIfFree checks the seat again just before it saves. In a real database, check and save together in a transaction.",
     language: "seating-store.mjs",
     code: `export function createSeatingStore() {
   const members = new Set(["ava", "bo"]);
@@ -39,8 +39,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Validate the request",
-    body: "Save this file at the path shown. The actor comes from the calling application. The payload supplies a seat ID. Reject an empty name before any storage access. The runner adds the named stage and step to a failed result.",
+    title: "Validate the seat ID",
+    body: "Save this file at the path shown. The caller supplies the person and the seat ID. This check rejects an empty ID before the app looks up any records. If it fails, the runner reports the stage and step.",
     language: "ICF/Stages/Validators/Domain/seats/requireSeatId.js",
     code: `export function requireSeatId(intent) {
   if (typeof intent.actor.id !== "string" || !intent.actor.id.trim()) {
@@ -55,7 +55,7 @@ node ICF/examples/checkPipeline.mjs`
   },
   {
     title: "Normalize the seat ID",
-    body: "Save this helper at the path shown. The string ' a1 ' becomes A1. Validate already checked the type, so Normalize can perform a single predictable conversion.",
+    body: "Save this file at the path shown. The input “ a1 ” becomes “A1”. Validate already checked that the value is text, so this step can focus on cleaning it up.",
     language: "ICF/Stages/Normalizers/Domain/seats/normalizeSeatId.js",
     code: `export function normalizeSeatId(intent) {
   intent.payload.seatId = intent.payload.seatId.trim().toUpperCase();
@@ -63,8 +63,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Load trusted seating facts",
-    body: "Save this helper at the path shown. Its store is configured by the application during startup. An unknown seat stops the request in AddContext. Known seats carry their actual owner and the verified membership fact into Authorize.",
+    title: "AddContext finds the seat and member",
+    body: "Save this file at the path shown. This step asks the store about the seat and the person. If the seat does not exist, stop here. If it does, pass its current owner and the membership check to Authorize.",
     language: "ICF/Stages/ContextProviders/Domain/seats/loadSeatFacts.js",
     code: `export function makeLoadSeatFacts(store) {
   return function loadSeatFacts(intent) {
@@ -76,8 +76,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Check eligibility and availability",
-    body: "Save this helper at the path shown. Both conditions come from the stored facts. A caller-supplied role or membership flag cannot grant a seat in this example.",
+    title: "Authorize checks who can book",
+    body: "Save this file at the path shown. Check that the person is a member and the seat is free. Use the facts from the store so a guest cannot claim to be a member.",
     language: "ICF/Stages/Authorizers/Domain/seats/allowReservation.js",
     code: `export function allowReservation(intent) {
   const facts = intent.context.seating;
@@ -87,8 +87,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Commit the reservation",
-    body: "Save this helper at the path shown. A second request can pass Authorize before the first finishes. The store’s final availability check settles which reservation succeeds. Process attaches the data for a receipt only after the store accepts the change.",
+    title: "Process books the seat",
+    body: "Save this file at the path shown. Two people might both pass the first check. Check again as you save so only one person gets the seat. Once it saves, prepare the details for the receipt.",
     language: "ICF/Stages/Processors/Domain/seats/reserveSeat.js",
     code: `export function makeReserveSeat(store) {
   return function reserveSeat(intent) {
@@ -102,8 +102,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Emit the receipt",
-    body: "Save this helper at the path shown. A successful result now contains an event with the committed seat and member IDs. This fixture collects the event in memory. A production receipt service needs its own delivery and deduplication contract.",
+    title: "Emit makes the receipt",
+    body: "Save this file at the path shown. The event records the seat and member IDs from the saved result. The sample keeps the event in memory. A real app that sends receipts should track each send so a retry cannot send an unwanted copy.",
     language: "ICF/Stages/Emitters/Domain/seats/emitSeatReserved.js",
     code: `export function emitSeatReserved(intent) {
   const data = intent.context.resultData;
@@ -115,8 +115,8 @@ node ICF/examples/checkPipeline.mjs`
 }`
   },
   {
-    title: "Declare the six stages",
-    body: "Create ICF/Intents/ReserveSeatIntent.js. Its factory binds the store at startup and makes fresh payload, context and stage groups for each request. The names in this table are the names you will read in a failure trace.",
+    title: "Put the six stages together",
+    body: "Create ICF/Intents/ReserveSeatIntent.js. The function that makes the Intent gets the store when the app starts. It creates a new request every time. The step names you write here are the names you will see in the trace.",
     language: "ICF/Intents/ReserveSeatIntent.js",
     source: "Template/ICF/Intents/RecommendNextLessonIntent.js",
     code: `import { requireSeatId } from "../Stages/Validators/Domain/seats/requireSeatId.js";
@@ -144,8 +144,8 @@ export function createReservationFactory(store) {
 }`
   },
   {
-    title: "Register the feature and expose its entry point",
-    body: "Create seating.mjs beside seating-store.mjs. Importing the module sets up one store and one factory per process. reserve constructs a fresh Intent for every request. In a deployed service, derive actorId from the authenticated session before calling this entry point.",
+    title: "Register the action and make it callable",
+    body: "Create seating.mjs beside seating-store.mjs. The module creates a store and registers the action once. Each call to reserve makes a new Intent. In a real app, get the actor ID from the signed-in account.",
     language: "seating.mjs",
     source: "Template/ICF/engine/intentRegistry.js",
     code: `import registry from "./ICF/engine/intentRegistry.js";
@@ -165,8 +165,8 @@ export async function reserve(actorId, seatId) {
 }`
   },
   {
-    title: "Add a command-line caller",
-    body: "Save try-seats.mjs at the project root. Arguments arrive as actor and seat pairs. One invocation shares one store, so you can observe a conflict. Starting a new process resets the fixture.",
+    title: "Make a terminal command for booking",
+    body: "Save try-seats.mjs in seat-demo. Give it a person and seat for each booking. Both bookings in one command use the same store so you can see a conflict. A new command starts with empty seats again.",
     language: "try-seats.mjs",
     code: `import { reserve } from "./seating.mjs";
 
@@ -184,14 +184,14 @@ for (let index = 0; index < inputs.length; index += 2) {
 }`
   },
   {
-    title: "Run a passing case and a failure",
-    body: "Run this inside seat-demo. After the stage logs, look for RESERVED A1 ava SeatReserved and then STOP Authorize.allowReservation Seat already reserved. Read the last named step before changing the feature.",
+    title: "Try a booking and then a repeat",
+    body: "Run this inside seat-demo. Look for “RESERVED A1 ava SeatReserved”. The next request should stop at Authorize.allowReservation because the seat is taken.",
     language: "Terminal · seat-demo",
     code: `node try-seats.mjs ava " a1 " bo A1`
   },
   {
-    title: "Keep an executable regression check",
-    body: "Save check-seats.mjs in the project root. The assertions check the raw-input failure, lookup failure, authorization failure, one successful write and event, and the stored owner after a second request. Node exits unsuccessfully if any contract changes.",
+    title: "Add a test you can run again",
+    body: "Save check-seats.mjs in seat-demo. It tests a bad ID, a missing seat, a guest, and a successful booking. It also checks who owns the seat after a second request. If a check fails, Node reports an error.",
     language: "check-seats.mjs",
     code: `import assert from "node:assert/strict";
 import { reserve, store } from "./seating.mjs";
@@ -221,8 +221,8 @@ assert.equal(store.readFacts("bo", "A1").owner, "ava");
 console.log("Seating checks passed.");`
   },
   {
-    title: "Verify locally and adapt one boundary at a time",
-    body: "Run the regression check from seat-demo. Its final line is “Seating checks passed.” For a real feature, keep these fixtures and add a test for your database’s conditional update, authenticated actor lookup and delivery adapter. Register the factory once in the application startup path. Route both the UI and API through the same Intent entry point.",
+    title: "Run the test and use it as a starting point",
+    body: "Run the test from seat-demo. The last line should say “Seating checks passed.” For your own app, also test how it checks identity, saves changes, and sends messages. Call the same Intent from the web page and from the API.",
     language: "Terminal · seat-demo",
     source: "Template/ICF.md",
     code: `node check-seats.mjs`
@@ -232,34 +232,34 @@ console.log("Seating checks passed.");`
 export const workflowGroups = [
   {
     id: "field-adaptive",
-    title: "Adaptive Context in practice",
+    title: "Use clues to pick a lesson",
     examples: [
       {
         id: "field-signal-baseline",
-        title: "Compare the learner before and after a difficult session",
-        task: "From the academy root, run the template's two complete recommendation fixtures. Find the lessonId, score and policy version in each response.",
+        title: "See how a tough session changes the lesson pick",
+        task: "Run both lesson examples from the main project folder. Compare the lesson ID, score, and set of rules used.",
         code: `node Template/ICF/examples/runAdaptiveContext.mjs`,
         language: "Terminal · academy root",
-        expected: "With no signals, advanced-project wins at 80. With repeatedErrors and shortSession both set to 1, prerequisite-review wins at 95. The policy stays at version 1.",
-        why: "The common policy lets you isolate the effect of the signal snapshot. A changed recommendation can be correct even though nobody edited the configuration.",
+        expected: "With no clues, advanced-project wins with 80. With both clues turned on, prerequisite-review wins with 95. The rule version stays at 1.",
+        why: "Both runs use the same rules. The new clues explain why the answer changed.",
         source: "Template/ICF/examples/runAdaptiveContext.mjs",
         related: "adaptive-context"
       },
       {
         id: "field-expiry",
-        title: "Reproduce an empty selection at the expiry boundary",
-        task: "Run this from the academy root. It repeats the lesson fixture with the clock moved from 1000 to 10000, the candidates’ exact expiry time.",
+        title: "Try a lesson choice right when it expires",
+        task: "Run this from the main project folder. The second command moves the sample clock from 1000 to 10000, when the choices expire.",
         code: `node Template/ICF/examples/runAdaptiveContext.mjs --expired`,
         language: "Terminal · academy root",
-        expected: "The run ends at AddContext.addAdaptiveContext. The error includes expired=3. Process and Emit never receive the request.",
-        why: "Eligibility uses an exclusive expiry boundary. The timestamps explain why even the highest base score cannot win.",
+        expected: "The run stops at AddContext.addAdaptiveContext. The error says expired=3. Process and Emit never run.",
+        why: "The clock tells you why all three choices were skipped, even ones with high scores.",
         source: "Template/ICF/examples/runAdaptiveContext.mjs",
         related: "evidence-eligibility"
       },
       {
         id: "field-budget-tie",
-        title: "Resolve a tie under a one-candidate budget",
-        task: "Save the block in an .mjs file in the academy root and run it with Node. Limit selection to one and set the project and preference base scores to 75.",
+        title: "Break a tie when only one choice can win",
+        task: "Save the code as an .mjs file in the main project folder and run it with Node. Give two choices a score of 75 and allow only one winner.",
         code: `import { rankContextCandidates } from "./Template/ICF/engine/adaptiveContext.js";
 import { createLessonCandidates, createLessonPolicy } from "./Template/ICF/examples/lessonServices.js";
 
@@ -277,15 +277,15 @@ for (const input of [candidates, candidates.slice().reverse()]) {
   console.log(decision.selected[0].id, decision.selected[0].score);
 }`,
         language: "JavaScript · .mjs at academy root",
-        expected: "Both runs print interest 75. Reversing the incoming records leaves the winner unchanged.",
-        why: "A stable ID breaks a score tie. The sort determines which candidate fits the remaining budget.",
+        expected: "Both runs print “interest 75”, even when you reverse the order.",
+        why: "When scores tie, a stable ID breaks the tie. Changing the order of the list does not change the winner.",
         source: "Template/ICF/engine/adaptiveContext.js",
         related: "evidence-scores"
       },
       {
         id: "field-signal-due",
-        title: "Evaluate one proposed signal offline",
-        task: "Create an .mjs file in the academy root. Introduce a practiceDue signal from a fixture and preserve the no-signal baseline.",
+        title: "Try one new clue without going online",
+        task: "Save this as an .mjs file in the main project folder. Compare the result with no clues to the result with practiceDue.",
         code: `import { rankContextCandidates } from "./Template/ICF/engine/adaptiveContext.js";
 import { createLessonCandidates, createLessonPolicy } from "./Template/ICF/examples/lessonServices.js";
 
@@ -303,15 +303,15 @@ for (const signals of [{}, { practiceDue: 1 }]) {
   console.log(winner.id, winner.score);
 }`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The first run prints project 80. The second prints gap 85. The candidate set, evaluation time and other policy weights match across runs.",
-        why: "This gives a reviewer a passing baseline and a measurable expected change before wiring a real schedule adapter.",
+        expected: "The first run prints “project 80”. The second prints “gap 85”.",
+        why: "Keep the same choices, time, and other rules. You can then see what the one new clue did.",
         source: "Template/ICF/examples/lessonServices.js",
         related: "evidence-scores"
       },
       {
         id: "field-denied-recommendation",
-        title: "Run a strong recommendation through a denied permission",
-        task: "Save the block as an .mjs file at the academy root. The signals favor review, but the trusted learner record forbids recommending.",
+        title: "Stop a lesson pick when permission is missing",
+        task: "Save this as an .mjs file in the main project folder. The clues point to review, but the learner’s record says the app cannot recommend a lesson.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import { createLessonRecommendationFactory } from "./Template/ICF/Intents/RecommendNextLessonIntent.js";
 import { createDemoLessonServices } from "./Template/ICF/examples/lessonServices.js";
@@ -323,15 +323,15 @@ const makeIntent = createLessonRecommendationFactory(services);
 const result = await pipeline.run(makeIntent({ id: "learner", role: "student" }, {}));
 console.log(result.ok, result.stage, result.step);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The final line is false Authorize authorizeLessonRecommendation. The result contains no recommendation data.",
-        why: "The trace shows that required permission still controls entry to Process after optional evidence was ranked.",
+        expected: "The last line is “false Authorize authorizeLessonRecommendation”. The app returns no lesson.",
+        why: "Evidence can help score a choice. It cannot give the app permission to use it.",
         source: "Template/ICF/Stages/Authorizers/Domain/adaptiveContext/authorizeLessonRecommendation.js",
         related: "authorize"
       },
       {
         id: "field-stale-publish",
-        title: "Diagnose two editors competing to publish",
-        task: "Save the block as an .mjs file in the academy root. Submit two independent requests that both expect policy version 1.",
+        title: "See what happens when two editors save at once",
+        task: "Save this as an .mjs file in the main project folder. Have two editors both try to change version 1.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import { createContextPolicyUpdateFactory } from "./Template/ICF/Intents/UpdateContextScoringPolicyIntent.js";
 import { createDemoLessonServices, createLessonPolicy } from "./Template/ICF/examples/lessonServices.js";
@@ -354,15 +354,15 @@ for (const response of responses) {
 }
 console.log("history", (await services.policyStore.history()).length);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "One request publishes version 2. The other reports Policy version conflict. History contains two entries including the original policy.",
-        why: "Expected-version checks turn a concurrent write into an observable Process failure. Review the winning policy before preparing another proposal.",
+        expected: "One change saves as version 2. The other gets “Policy version conflict”. The history has the old version and the new one.",
+        why: "Check which version is live before you save. This keeps one editor from silently replacing the other’s change.",
         source: "Template/ICF/Intents/UpdateContextScoringPolicyIntent.js",
         related: "policy-updates"
       },
       {
         id: "field-rollback",
-        title: "Restore a configuration and retain its change history",
-        task: "Save the block as an .mjs file in the academy root. Publish the changed proposal, read the original policy from history and publish that configuration again.",
+        title: "Restore old rules and keep the history",
+        task: "Save this as an .mjs file in the main project folder. Change the policy, then take the original rules from history and save them again.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import { createContextPolicyUpdateFactory } from "./Template/ICF/Intents/UpdateContextScoringPolicyIntent.js";
 import { createDemoLessonServices, createLessonPolicy } from "./Template/ICF/examples/lessonServices.js";
@@ -385,8 +385,8 @@ const active = await services.policyStore.read();
 console.log(active.version, active.categories.prerequisite.baseScore);
 console.log((await services.policyStore.history()).length);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The final lines are 3 60 and 3. The restored rules have a new version and the earlier change still appears in history.",
-        why: "A new version identifies exactly when the original behavior returned for future evaluations.",
+        expected: "The last two lines are “3 60” and “3”. The restored rules are version 3 and there are three history entries.",
+        why: "An undo saves a new version. You can still see every change that led up to it.",
         source: "Template/ICF/engine/contextPolicyStore.js",
         related: "policy-updates"
       }
@@ -398,8 +398,8 @@ console.log((await services.policyStore.history()).length);`,
     examples: [
       {
         id: "field-startup-miss",
-        title: "Distinguish a setup failure from a pipeline failure",
-        task: "Run this .mjs file at the academy root in a fresh Node process. Request a known demo type before and after its startup registration.",
+        title: "Tell a setup error from a step error",
+        task: "Run this .mjs file in the main project folder. Ask for DemoIntent before and after registering it.",
         code: `import registry from "./Template/ICF/engine/intentRegistry.js";
 import demo from "./Template/ICF/Intents/DemoIntent.js";
 
@@ -409,15 +409,15 @@ console.log(missing.ok, missing.errors[0]);
 registry.registerIntent("DemoIntent", demo.createDemoIntent);
 console.log(registry.createIntent("DemoIntent", actor, {}).ok);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "First you see false and Intent is not registered: DemoIntent. The second line prints true. No stage has executed.",
-        why: "A registry lookup happens before the runner can produce its trace. Check the type and startup registration before debugging a stage helper.",
+        expected: "First you see false and “Intent is not registered: DemoIntent.” After setup it prints true. No stage has run yet.",
+        why: "Creating the request and running its steps are separate jobs.",
         source: "Template/ICF/engine/intentRegistry.js",
         related: "intent-registry"
       },
       {
         id: "field-preflight",
-        title: "Locate a missing declaration before the first helper",
-        task: "Save this .mjs file at the academy root. Remove Emit from a fresh demo Intent before passing it to the runner.",
+        title: "Find a missing stage before the run starts",
+        task: "Save this as an .mjs file in the main project folder. Remove Emit from a demo Intent before you run it.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import demo from "./Template/ICF/Intents/DemoIntent.js";
 
@@ -431,15 +431,15 @@ const result = await pipeline.run(intent);
 console.log(result.stage, result.meta.pipelineTrace.length);
 console.log(result.errors.join(" "));`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The summary is Pipeline 0 and the error names Emit.",
-        why: "An empty trace points to a preflight contract failure. Repair the factory that built the stage map.",
+        expected: "The summary is “Pipeline 0” and the error names Emit.",
+        why: "Zero steps in the trace tells you to start by checking the stage list.",
         source: "Template/ICF/examples/checkPipeline.mjs",
         related: "failure-traces"
       },
       {
         id: "field-runtime-declaration",
-        title: "Find a helper that accidentally empties the next stage",
-        task: "Run this .mjs file at the academy root. Record the last completed step when a Normalize helper replaces AddContext with an empty group.",
+        title: "Find the step that emptied the next stage",
+        task: "Run this .mjs file in the main project folder. The Normalize helper changes AddContext so it has no steps.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import demo from "./Template/ICF/Intents/DemoIntent.js";
 
@@ -459,15 +459,15 @@ const tail = result.meta.pipelineTrace.at(-1);
 console.log(result.stage, tail.stage, tail.step, tail.ok);
 console.log(result.errors.join(" "));`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The final trace row passed at Normalize.cleanInput. The failure reports Pipeline and identifies AddContext.",
-        why: "The declaration was complete during preflight. The last successful helper provides a concrete place to inspect the later change.",
+        expected: "The trace shows Normalize.cleanInput passed. The error names Pipeline and AddContext.",
+        why: "A stage list can start out right and get changed later. Check the last helper that ran.",
         source: "Template/ICF/examples/checkPipeline.mjs",
         related: "failure-traces"
       },
       {
         id: "field-broken-return",
-        title: "Repair a helper that returns a bare Intent",
-        task: "Run this .mjs file at the academy root. Keep the input and step name fixed while replacing the helper's return value.",
+        title: "Fix a step that returns the wrong shape",
+        task: "Run this .mjs file in the main project folder. Run the same input twice and change only what the helper returns.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import demo from "./Template/ICF/Intents/DemoIntent.js";
 
@@ -485,15 +485,15 @@ const fixed = await runWith(function wrapped(intent) { return { ok: true, intent
 console.log(broken.stage, broken.step, broken.ok);
 console.log(fixed.ok, fixed.meta.pipelineTrace.at(-1).stage);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The first summary is Normalize cleanInput false. The repaired request prints true Emit.",
-        why: "The helper’s success envelope is part of the runner contract. Returning an object that happens to contain the right payload leaves the result ambiguous.",
+        expected: "The first summary is “Normalize cleanInput false”. The second prints “true Emit”.",
+        why: "A plain helper returns an object with ok and, when needed, the updated Intent.",
         source: "Template/ICF/examples/checkPipeline.mjs",
         related: "stage-contracts"
       },
       {
         id: "field-commit-vs-delivery",
-        title: "Check the committed state after a notification failure",
-        task: "Save this .mjs file at the academy root. Give the demo a one-write Process and a failing Emit. Inspect both the runner result and your fixture’s state.",
+        title: "Check saved data after a message fails",
+        task: "Save this as an .mjs file in the main project folder. Make Process save one loan and Emit fail to send the receipt.",
         code: `import pipeline from "./Template/ICF/engine/pipeline.js";
 import demo from "./Template/ICF/Intents/DemoIntent.js";
 
@@ -515,15 +515,15 @@ intent.stages.Emit = {
 const result = await pipeline.run(intent);
 console.log(result.stage, result.step, ledger.length, ledger[0]);`,
         language: "JavaScript · .mjs at academy root",
-        expected: "The final line is Emit sendReceipt 1 loan-42. The failed result and committed loan coexist.",
-        why: "Replaying the original write would produce a duplicate loan. Use a persisted operation ID and recover the outstanding delivery.",
+        expected: "The final line is “Emit sendReceipt 1 loan-42”. The loan was saved.",
+        why: "A send failure does not tell you whether the loan saved. Check the store before retrying.",
         source: "Template/ICF/examples/checkPipeline.mjs",
         related: "retries"
       },
       {
         id: "field-retry-recipient",
-        title: "Replay the same receipt at an idempotent receiver",
-        task: "Run this .mjs file at the academy root. Model the receiver storing a receipt and then losing the acknowledgement. The sender retries with the original delivery ID.",
+        title: "Send the same receipt twice and store it once",
+        task: "Run this .mjs file in the main project folder. The first send stores the receipt but loses its reply. Send it again with the same ID.",
         code: `import assert from "node:assert/strict";
 const receipts = new Map();
 function deliver(event) {
@@ -538,20 +538,20 @@ assert.equal(deliver(queued), "already delivered");
 assert.equal(receipts.size, 1);
 console.log("One receipt, two delivery attempts.");`,
         language: "JavaScript · .mjs at academy root",
-        expected: "Both deliveries complete with one receipt stored. The final line reports One receipt, two delivery attempts.",
-        why: "This fixture models deduplication in one process. In a real receiver, persist the receipt and its unique delivery ID atomically. Commit the original mutation and the pending delivery together in the sender’s store.",
+        expected: "The final line is “One receipt, two delivery attempts.”",
+        why: "Save the receipt by its delivery ID so the second send can find the first result.",
         source: "Template/ICF.md",
         related: "retries"
       },
       {
         id: "field-compare-fixtures",
-        title: "Refresh a template copy and rerun its contract checks",
-        task: "From the academy root, compare the template change record with the adopted version. Run both local fixtures and keep the expected failure cases beside their passing counterparts.",
+        title: "Check your copy after updating the template",
+        task: "From the main project folder, compare the template’s notes with your copy. Then run both checks.",
         code: `node Template/ICF/examples/checkPipeline.mjs --verbose
 node scripts/check-adaptive-context.mjs`,
         language: "Terminal · academy root",
-        expected: "The first command ends with Pipeline checks passed. The repaired Normalize.cleanInput reached Emit. The second emits a JSON summary with status passed.",
-        why: "These checks exercise the shared runtime. A project using its own database or delivery adapter should run equivalent tests against those adapters before adopting a changed runtime.",
+        expected: "The first command says the pipeline checks passed. The second prints a result with “status” set to “passed”.",
+        why: "Run checks before and after an update. Expected failures should still stop in the right place.",
         source: "Template/ICF/CHANGES.md",
         related: "maintain-a-feature"
       }
@@ -563,8 +563,8 @@ node scripts/check-adaptive-context.mjs`,
     examples: [
       {
         id: "field-studio-remotes",
-        title: "Verify the three RemoteEvents before a play test",
-        task: "Install the historical sample under the Roblox services named in its README, including its ModuleScripts. Create the Remotes folder and three RemoteEvents in ReplicatedStorage. Run this in Studio’s command bar before testing the handlers.",
+        title: "Check that the Roblox messages are set up",
+        task: "Set up the sample from its README. Add the Remotes folder and all three RemoteEvents in ReplicatedStorage. Run the code in the Studio command bar.",
         code: `local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
 assert(remotes, "Create ReplicatedStorage.Remotes")
 for _, name in ipairs({ "BuySword", "ClaimRewardChest", "UiFeedback" }) do
@@ -573,15 +573,15 @@ for _, name in ipairs({ "BuySword", "ClaimRewardChest", "UiFeedback" }) do
     print("Ready", name)
 end`,
         language: "Luau · Roblox Studio",
-        expected: "The Output panel shows one Ready line for each event. A missing object produces the name of the required event.",
-        why: "The handlers and clients use WaitForChild with these exact names. A misnamed instance can stall the demonstration before any Intent is created.",
+        expected: "The Output panel shows a Ready line for each event. If one is missing, the error names it.",
+        why: "A quick check of the object names can save time before you test a purchase.",
         source: "using ICF in Roblox/sample-project/README.md",
         related: "roblox-actions"
       },
       {
         id: "field-server-price",
-        title: "Purchase a shield using the server’s price",
-        task: "In a fresh single-player Studio play test with the sample installed, use this temporary LocalScript in StarterPlayerScripts in place of the automatic purchase and chest sample scripts. Keep the UiFeedback listener. The context builder recognizes Shield01.",
+        title: "Buy a shield at the server’s price",
+        task: "Start a fresh one-player test in Studio. Use this temporary LocalScript in StarterPlayerScripts in place of the sample scripts that buy or claim things on their own. Keep UiFeedback.",
         code: `local storage = game:GetService("ReplicatedStorage")
 local remotes = storage:WaitForChild("Remotes")
 local function showReceipt(message)
@@ -592,15 +592,15 @@ end
 remotes:WaitForChild("UiFeedback").OnClientEvent:Connect(showReceipt)
 remotes:WaitForChild("BuySword"):FireServer({ itemId = "Shield01" })`,
         language: "Luau · Roblox Studio",
-        expected: "The server begins with 250 coins, loads the price of 150, marks Shield01 owned and sends a receipt with 100 coins remaining.",
-        why: "The client asks for the item by ID. The server builds inventory and price context and sends the confirmed amount back to the requesting player.",
+        expected: "The player starts with 250 coins. The shield costs 150. The player owns Shield01 and has 100 coins left.",
+        why: "The server reads the price from its own list and checks the player’s balance.",
         source: "using ICF in Roblox/sample-project/ServerScriptService/Domain/Shop/BuildContext.lua",
         related: "roblox-actions"
       },
       {
         id: "field-insufficient-coins",
-        title: "Check a purchase denial without changing the balance",
-        task: "Use this temporary server Script in the sample place. It invokes the actual shop domain with a synthetic inventory and 20 coins. The denied path stops before Finalize, so a live Player object is unnecessary for this fixture.",
+        title: "Deny a purchase when the player is short on coins",
+        task: "Run this temporary server Script in the sample place. Give the sample shopper 20 coins and an empty inventory.",
         code: `local root = game:GetService("ServerScriptService")
 local runner = require(root.Core.IntentRunner)
 local shop = require(root.Domain.Shop)
@@ -613,15 +613,15 @@ assert(result.errors[1] == "not enough coins")
 assert(state.coins == 20 and state.inventory.Shield01 == nil)
 print("Denied before purchase")`,
         language: "Luau · Roblox Studio",
-        expected: "The test prints Denied before purchase. The balance remains 20 and the inventory is empty.",
-        why: "This historical implementation reports lowercase stage names. Check the stored balance as well as the error when porting a denial fixture.",
+        expected: "The test prints “Denied before purchase”. The player still has 20 coins and no new items.",
+        why: "Check the saved balance and items when a purchase fails. Neither should change.",
         source: "using ICF in Roblox/sample-project/ServerScriptService/Domain/Shop/Authorize.lua",
         related: "roblox-actions"
       },
       {
         id: "field-duplicate-chest",
-        title: "Prove a claimed chest cannot pay twice",
-        task: "Run this temporary server Script in the sample place. Supply a chest ID already recorded by a previous claim. This targets the historical sample's earliest duplicate check.",
+        title: "Keep a chest from paying twice",
+        task: "Run this temporary server Script in the sample place. Use a chest ID already marked as claimed.",
         code: `local root = game:GetService("ServerScriptService")
 local runner = require(root.Core.IntentRunner)
 local rewards = require(root.Domain.Rewards)
@@ -634,15 +634,15 @@ assert(result.errors[1] == "chest already claimed")
 assert(state.coins == 300)
 print("Duplicate claim stopped")`,
         language: "Luau · Roblox Studio",
-        expected: "The second claim stops at validate. The test prints Duplicate claim stopped and the balance remains 300.",
-        why: "The sample checks duplicates during validation before its authorization check. A persistent implementation also needs a conditional write to settle simultaneous claims.",
+        expected: "The second claim stops at validate. It prints “Duplicate claim stopped”. The balance stays at 300.",
+        why: "Check the saved claim before you add coins again.",
         source: "using ICF in Roblox/sample-project/ServerScriptService/Domain/Rewards/Validators.lua",
         related: "roblox-actions"
       },
       {
         id: "field-historical-runner",
-        title: "Trace one reward before porting the historical runner",
-        task: "In a fresh Studio play test, replace the automatically firing shop and chest scripts with this LocalScript. The server derives the player from OnServerEvent and awards its fixed reward. Observe the final feedback in the client Output panel.",
+        title: "Follow a chest reward in the older Roblox sample",
+        task: "Start a fresh Studio test and use this LocalScript instead of the sample scripts that run on their own. Watch the client Output panel.",
         code: `local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
 local function inspectClaim(message)
     if message.type == "RewardChestConfirmed" then
@@ -652,8 +652,8 @@ end
 remotes:WaitForChild("UiFeedback").OnClientEvent:Connect(inspectClaim)
 remotes:WaitForChild("ClaimRewardChest"):FireServer({ chestId = "meadow" })`,
         language: "Luau · Roblox Studio",
-        expected: "For an untouched player the client prints meadow 50 300. Follow the historical server stages through Validators, BuildContext, Authorize, Process and Finalize.",
-        why: "Use this receipt as a parity test during a port. Add an explicit Normalize between Validate and AddContext and map the historical Finalize feedback to Emit. Execute the migrated path in Roblox Studio.",
+        expected: "For a fresh player it prints “meadow 50 300”. The older server steps include BuildContext and Finalize.",
+        why: "Read what each older step does before you move it to the current six-stage template.",
         source: "using ICF in Roblox/sample-project/ServerScriptService/Core/IntentRunner.lua",
         related: "roblox-actions"
       }
@@ -661,34 +661,34 @@ remotes:WaitForChild("ClaimRewardChest"):FireServer({ chestId = "meadow" })`,
   },
   {
     id: "field-adoption",
-    title: "End-to-end seating scenarios",
+    title: "Seat booking examples",
     examples: [
       {
         id: "field-domain-smoke",
-        title: "Exercise a new domain through its public entry point",
-        task: "First build the reservation feature in the adoption guide. Run this command inside seat-demo to reserve two seats in one in-memory session.",
+        title: "Try the seat feature from the terminal",
+        task: "First build the seat feature in the guide. Run this command inside seat-demo to book two different seats in one run.",
         code: `node try-seats.mjs ava " a1 " bo B2`,
         language: "Terminal · seat-demo",
-        expected: "The result lines are RESERVED A1 ava SeatReserved and RESERVED B2 bo SeatReserved. Both calls pass through the registered factory and all six runner stages.",
-        why: "A smoke test through the same entry point a UI would call checks the wiring, normalization, stored change and emitted receipt in one run.",
+        expected: "Ava gets A1 and Bo gets B2. Each receipt ends with SeatReserved.",
+        why: "Running the feature this way checks the code that real callers use.",
         source: "Template/README.md",
         related: "feature-adoption"
       },
       {
         id: "field-multiple-failures",
-        title: "Identify which boundary rejected each seating request",
-        task: "With the adoption-guide feature installed, run four requests from seat-demo in one process. Use whitespace for an invalid seat, Z9 for a missing record, and guest for an unverified member.",
+        title: "Find which step stopped each seat request",
+        task: "After building seat-demo, try an ID made of spaces, unknown seat Z9, a guest request, and a valid booking.",
         code: `node try-seats.mjs ava " " ava Z9 guest A1 ava A1`,
         language: "Terminal · seat-demo",
-        expected: "The first three summaries begin STOP Validate.requireSeatId, STOP AddContext.loadSeatFacts and STOP Authorize.allowReservation. The last is RESERVED A1 ava SeatReserved.",
-        why: "These requests express different failures for the same action. A final success on A1 confirms that none of those failures consumed the seat.",
+        expected: "The first three stop at Validate.requireSeatId, AddContext.loadSeatFacts, and Authorize.allowReservation. Ava then gets A1.",
+        why: "Different mistakes stop at different steps. The trace tells you which check to read.",
         source: "Template/README.md",
         related: "failure-traces"
       },
       {
         id: "field-reserve-race",
-        title: "Settle two competing reservations",
-        task: "After completing the adoption guide, save this block as race.mjs beside seating.mjs and run node race.mjs from seat-demo. Both actors request the same normalized seat without awaiting the other.",
+        title: "Try booking the same seat at the same time",
+        task: "After building seat-demo, save this as race.mjs next to seating.mjs and run node race.mjs. Start both requests before waiting for either one.",
         code: `import assert from "node:assert/strict";
 import { reserve, store } from "./seating.mjs";
 
@@ -700,15 +700,15 @@ assert.equal(losers.length, 1);
 assert.equal(store.readFacts("ava", "A1").owner, winners[0].data.memberId);
 console.log("Winner owns A1. Losing boundary:", losers[0].stage, losers[0].step);`,
         language: "JavaScript · race.mjs in seat-demo",
-        expected: "Exactly one request wins. The final owner matches its receipt. A request stopped by the final availability check reports Process.reserveSeat. A request arriving after the commit can stop earlier in Authorize.",
-        why: "Independent reads may both see an open seat. Ownership is decided by the adapter’s conditional mutation. Repeat this fixture against your actual database to check its concurrency guarantees.",
+        expected: "Only one request wins. The saved owner matches that receipt. The other stops at the final Process check or, if it arrives later, at Authorize.",
+        why: "A final check at the write prevents both callers from getting the same seat.",
         source: "Template/README.md",
         related: "transactions"
       },
       {
         id: "field-receipt-projection",
-        title: "Return a public receipt from an application endpoint",
-        task: "After completing the adoption guide, save this block as receipt.mjs in seat-demo and run node receipt.mjs. Project the reservation result into the small response a caller needs.",
+        title: "Send a short seat receipt to the caller",
+        task: "After building seat-demo, save this as receipt.mjs and run node receipt.mjs. Pick the few fields the caller needs.",
         code: `import { reserve } from "./seating.mjs";
 
 function publicReceipt(result) {
@@ -720,8 +720,8 @@ function publicReceipt(result) {
 console.log(JSON.stringify(publicReceipt(await reserve("ava", "B2"))));
 console.log(JSON.stringify(publicReceipt(await reserve("bo", "B2"))));`,
         language: "JavaScript · receipt.mjs in seat-demo",
-        expected: "The first receipt contains accepted=true, seat=B2 and member=ava. The second contains accepted=false and reason “Seat already reserved.”",
-        why: "This boundary keeps the working Intent, trusted context and internal step details inside the application. In a hosted service, choose public error messages appropriate to the caller.",
+        expected: "The first receipt says Ava got B2. The second says “Seat already reserved.”",
+        why: "A caller needs the answer and a useful reason if it failed. Keep the full trace in the app for debugging.",
         source: "Template/README.md",
         related: "result-envelope"
       }

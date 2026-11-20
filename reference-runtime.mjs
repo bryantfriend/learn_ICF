@@ -22,12 +22,12 @@ var currentIntent = { type: 'BorrowBookIntent', actor: { id: 'ava' }, payload: {
 var library = { available: 1, loans: 0 };
 var statuses = [];
 var descriptions = [
-  ['Is the request usable?', 'Check that bookId is a non-empty string. Validate inspects raw input first. It does not borrow anything.'],
-  ['Make the input consistent.', 'Trim the spaces from “ moon-atlas ”. Normalize cleans the payload after its basic shape has passed validation.'],
-  ['Load facts we can trust.', 'Look up Ava’s membership and the book’s availability in the library records. A claim in the payload is not proof of membership.'],
+  ['Is the request usable?', 'Check that bookId is text and contains a book ID. This step only checks the request.'],
+  ['Make the input consistent.', 'Trim the spaces from “ moon-atlas ”. Normalize tidies up the input after Validate checks it.'],
+  ['Load facts we can trust.', 'Look up Ava’s membership and the book’s availability in the library records. Check the library records to know whether Ava is a member.'],
   ['Is Ava allowed to do this?', 'Only a library member can borrow an available book. A valid request can still be denied.'],
-  ['Make the important change.', 'Record Ava’s loan and remove the book from the available shelf. A real database needs an atomic write and a fresh availability check to handle competing borrowers.'],
-  ['Share the outcome.', 'Return useful loan information and send a controlled notification. The loan is already committed: a failed notification must not cause a second loan.']
+  ['Make the important change.', 'Record Ava’s loan and remove the book from the available shelf. In a real app, check that the book is still free as part of saving the loan. That way two people cannot borrow the same copy.'],
+  ['Share the outcome.', 'Send Ava a message with the loan details. If the message fails, the loan is still saved. Try sending the message again without making a new loan.']
 ];
 function drawPipeline() {
   document.getElementById('pipeline').innerHTML = stageNames.map(function (name, index) {

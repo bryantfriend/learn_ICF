@@ -91,26 +91,26 @@ function renderTrace(list, result) {
 export function mountPlayground(element) {
   element.innerHTML = `
     <div class="pg-lab">
-      <p class="pg-intro">Recommend a lesson using the template’s in-memory learning records. Change the learner or the evidence and follow the result through each stage.</p>
+      <p class="pg-intro">Try a sample lesson request. Change who asks or what clues the app sees. Then check which steps run and what answer they give.</p>
       <div class="pg-lab-grid">
         <form class="pg-inputs">
           <h2>Run settings</h2>
           <label class="pg-control">Scenario<select aria-label="Scenario" name="scenario"></select></label>
           <label class="pg-control">Actor ID<input type="text" autocomplete="off" spellcheck="false" name="actorId"></label>
-          <fieldset><legend>Learning signals</legend>
+          <fieldset><legend>Clues about the lesson</legend>
             <label class="pg-check"><input type="checkbox" name="repeatedErrors">Repeated errors</label>
             <label class="pg-check"><input type="checkbox" name="shortSession">Short session</label>
           </fieldset>
-          <fieldset><legend>Verified permissions</legend>
+          <fieldset><legend>What the learner is allowed to do</legend>
             <label class="pg-check"><input type="checkbox" name="allowed">Can recommend lessons</label>
           </fieldset>
           <button class="pg-run" type="submit"><span class="pg-play" aria-hidden="true"></span>Run pipeline</button>
         </form>
-        <section class="pg-trace-panel" aria-label="Execution trace">
-          <h2>Execution trace</h2>
+        <section class="pg-trace-panel" aria-label="Steps that ran">
+          <h2>Steps that ran</h2>
           <p class="pg-trace-status" role="status"></p>
           <ol class="pg-trace"></ol>
-          <details class="pg-details" hidden><summary>Result data and trace</summary><pre tabindex="0"></pre></details>
+          <details class="pg-details" hidden><summary>Full answer and list of steps</summary><pre tabindex="0"></pre></details>
         </section>
       </div>
     </div>`;
@@ -186,7 +186,7 @@ export function mountPlayground(element) {
   form.addEventListener("input", function markCustom(event) {
     if (event.target === scenario) return;
     scenario.value = "custom";
-    resetTrace("Run the pipeline to see the trace for these inputs.");
+    resetTrace("Run the steps to see what happens with these settings.");
   });
   form.addEventListener("submit", function submit(event) {
     event.preventDefault();

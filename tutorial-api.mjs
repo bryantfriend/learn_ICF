@@ -8,7 +8,7 @@ export const apiGroups = [
       {
         "id": "validate-validatePolicyUpdate",
         "key": "validatePolicyUpdate",
-        "description": "Check the proposed scoring-policy update before loading or writing policy state.",
+        "description": "Check a request to change the scoring rules before the app reads or saves the rules.",
         "kind": "Stage step",
         "signature": "validators.validatePolicyUpdate(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -19,7 +19,7 @@ export const apiGroups = [
       {
         "id": "validate-passValidation",
         "key": "passValidation",
-        "description": "Explicit pass-through validator.",
+        "description": "Let the request through Validate as it is.",
         "kind": "Stage step",
         "signature": "validators.passValidation(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -33,7 +33,7 @@ export const apiGroups = [
       {
         "id": "validate-passValidate",
         "key": "passValidate",
-        "description": "Explicit pass-through validator for Intents that have no custom validation work yet.",
+        "description": "Let the request through Validate as it is.",
         "kind": "Stage object",
         "signature": "validators.passValidate",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -44,7 +44,7 @@ export const apiGroups = [
       {
         "id": "validate-requireIntentType",
         "key": "requireIntentType",
-        "description": "Requires the Intent to have a valid type.",
+        "description": "Check that the request has a valid action name.",
         "kind": "Stage step",
         "signature": "validators.requireIntentType(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -58,7 +58,7 @@ export const apiGroups = [
       {
         "id": "validate-requireActor",
         "key": "requireActor",
-        "description": "Requires the Intent to have a valid actor object.",
+        "description": "Check that the request says who asked.",
         "kind": "Stage step",
         "signature": "validators.requireActor(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -72,7 +72,7 @@ export const apiGroups = [
       {
         "id": "validate-requirePayload",
         "key": "requirePayload",
-        "description": "Requires the Intent to have a payload object.",
+        "description": "Check that the request has an object for the inputs.",
         "kind": "Stage step",
         "signature": "validators.requirePayload(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -86,7 +86,7 @@ export const apiGroups = [
       {
         "id": "validate-requireContext",
         "key": "requireContext",
-        "description": "Requires the Intent to have a context object.",
+        "description": "Check that the request has an object for facts and results.",
         "kind": "Stage step",
         "signature": "validators.requireContext(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -100,7 +100,7 @@ export const apiGroups = [
       {
         "id": "validate-requireBaseIntentShape",
         "key": "requireBaseIntentShape",
-        "description": "Requires the basic shape that every ICF Intent must have.",
+        "description": "Check that the request has the basic parts ICF needs.",
         "kind": "Stage step",
         "signature": "validators.requireBaseIntentShape(intent)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -114,7 +114,7 @@ export const apiGroups = [
       {
         "id": "validate-exampleRequireStoreId",
         "key": "exampleRequireStoreId",
-        "description": "Example validator that requires payload.storeId before a store-related Intent can continue.",
+        "description": "Stop the request if it has no store ID.",
         "kind": "Stage object",
         "signature": "validators.exampleRequireStoreId",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -125,7 +125,7 @@ export const apiGroups = [
       {
         "id": "validate-createRequireActorRoleValidator",
         "key": "createRequireActorRoleValidator",
-        "description": "Creates a validator that requires the actor to have one of the allowed roles.",
+        "description": "Make a check that accepts only the roles you list in the actor field.",
         "kind": "Configured helper",
         "signature": "validators.createRequireActorRoleValidator(allowedRoles)",
         "importLine": "import validators from \"./Template/ICF/Stages/Validators/validators.js\";",
@@ -146,7 +146,7 @@ export const apiGroups = [
       {
         "id": "normalize-normalizePolicyUpdate",
         "key": "normalizePolicyUpdate",
-        "description": "Standardize the policy update payload for later checks.",
+        "description": "Put the new scoring rules into a standard format for later checks.",
         "kind": "Stage step",
         "signature": "normalizers.normalizePolicyUpdate(intent)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -157,7 +157,7 @@ export const apiGroups = [
       {
         "id": "normalize-passNormalization",
         "key": "passNormalization",
-        "description": "Explicit pass-through normalizer.",
+        "description": "Let the request through Normalize as it is.",
         "kind": "Stage step",
         "signature": "normalizers.passNormalization(intent)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -171,7 +171,7 @@ export const apiGroups = [
       {
         "id": "normalize-passNormalize",
         "key": "passNormalize",
-        "description": "Explicit pass-through normalizer for Intents that do not need payload cleanup yet.",
+        "description": "Let the request through Normalize as it is.",
         "kind": "Stage object",
         "signature": "normalizers.passNormalize",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -182,7 +182,7 @@ export const apiGroups = [
       {
         "id": "normalize-exampleTrimProductName",
         "key": "exampleTrimProductName",
-        "description": "Example normalizer that trims payload.productName so later stages work with clean text.",
+        "description": "Remove spaces from the start and end of the product name.",
         "kind": "Stage object",
         "signature": "normalizers.exampleTrimProductName",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -193,7 +193,7 @@ export const apiGroups = [
       {
         "id": "normalize-createTrimPayloadStringFieldNormalizer",
         "key": "createTrimPayloadStringFieldNormalizer",
-        "description": "Creates a normalizer that trims a string field inside intent.payload.",
+        "description": "Make a step that trims spaces from a text field you choose.",
         "kind": "Configured helper",
         "signature": "normalizers.createTrimPayloadStringFieldNormalizer(fieldName)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -207,7 +207,7 @@ export const apiGroups = [
       {
         "id": "normalize-createNormalizePayloadNumberFieldNormalizer",
         "key": "createNormalizePayloadNumberFieldNormalizer",
-        "description": "Creates a normalizer that converts a payload field into a number.",
+        "description": "Make a step that turns a field you choose into a number.",
         "kind": "Configured helper",
         "signature": "normalizers.createNormalizePayloadNumberFieldNormalizer(fieldName)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -221,7 +221,7 @@ export const apiGroups = [
       {
         "id": "normalize-createNormalizePayloadBooleanFieldNormalizer",
         "key": "createNormalizePayloadBooleanFieldNormalizer",
-        "description": "Creates a normalizer that converts common boolean-like payload values into true or false.",
+        "description": "Make a step that reads values such as yes and no as true or false.",
         "kind": "Configured helper",
         "signature": "normalizers.createNormalizePayloadBooleanFieldNormalizer(fieldName)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -235,7 +235,7 @@ export const apiGroups = [
       {
         "id": "normalize-createNormalizePayloadDateFieldNormalizer",
         "key": "createNormalizePayloadDateFieldNormalizer",
-        "description": "Creates a normalizer that converts a payload date field into an ISO string.",
+        "description": "Make a step that writes a date in the standard ISO format.",
         "kind": "Configured helper",
         "signature": "normalizers.createNormalizePayloadDateFieldNormalizer(fieldName)",
         "importLine": "import normalizers from \"./Template/ICF/Stages/Normalizers/normalizers.js\";",
@@ -256,7 +256,7 @@ export const apiGroups = [
       {
         "id": "add-context-createAdaptiveContextProvider",
         "key": "createAdaptiveContextProvider",
-        "description": "Load a versioned policy, capture signals, and rank eligible optional evidence during AddContext.",
+        "description": "Read the current rules and clues. Use them to score choices that can be picked.",
         "kind": "Configured helper",
         "signature": "contextProviders.createAdaptiveContextProvider(loadSnapshot)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -267,7 +267,7 @@ export const apiGroups = [
       {
         "id": "add-context-createLessonContextProvider",
         "key": "createLessonContextProvider",
-        "description": "Look up the learner through the trusted identity service and attach the verified record.",
+        "description": "Look up the learner and add their checked record to the request.",
         "kind": "Configured helper",
         "signature": "contextProviders.createLessonContextProvider(services)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -278,7 +278,7 @@ export const apiGroups = [
       {
         "id": "add-context-createPolicyUpdateContextProvider",
         "key": "createPolicyUpdateContextProvider",
-        "description": "Load the verified operator and current policy before a policy update.",
+        "description": "Look up who asked for the change and which rules are live.",
         "kind": "Configured helper",
         "signature": "contextProviders.createPolicyUpdateContextProvider(services)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -289,7 +289,7 @@ export const apiGroups = [
       {
         "id": "add-context-passContext",
         "key": "passContext",
-        "description": "Explicit pass-through context provider.",
+        "description": "Let the request through AddContext as it is.",
         "kind": "Stage step",
         "signature": "contextProviders.passContext(intent)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -303,7 +303,7 @@ export const apiGroups = [
       {
         "id": "add-context-passAddContext",
         "key": "passAddContext",
-        "description": "Explicit pass-through AddContext step for Intents that have no trusted system data to attach yet.",
+        "description": "Let the request through AddContext as it is.",
         "kind": "Stage object",
         "signature": "contextProviders.passAddContext",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -314,7 +314,7 @@ export const apiGroups = [
       {
         "id": "add-context-addTimestampContext",
         "key": "addTimestampContext",
-        "description": "Adds a trusted timestamp to intent.context.",
+        "description": "Add the current time to the request’s context.",
         "kind": "Stage step",
         "signature": "contextProviders.addTimestampContext(intent)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -328,7 +328,7 @@ export const apiGroups = [
       {
         "id": "add-context-addSourceContext",
         "key": "addSourceContext",
-        "description": "Adds source context from intent.meta.source.",
+        "description": "Copy where the request came from into context.",
         "kind": "Stage step",
         "signature": "contextProviders.addSourceContext(intent)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -342,7 +342,7 @@ export const apiGroups = [
       {
         "id": "add-context-addActorRoleContext",
         "key": "addActorRoleContext",
-        "description": "Adds actor role context from intent.actor.role.",
+        "description": "Copy the role from actor.role into context. This does not check the role.",
         "kind": "Stage step",
         "signature": "contextProviders.addActorRoleContext(intent)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -356,7 +356,7 @@ export const apiGroups = [
       {
         "id": "add-context-createAddStaticContextValueProvider",
         "key": "createAddStaticContextValueProvider",
-        "description": "Creates a context provider that adds one static context value.",
+        "description": "Make a step that adds a fixed value to context.",
         "kind": "Configured helper",
         "signature": "contextProviders.createAddStaticContextValueProvider(contextKey, contextValue)",
         "importLine": "import contextProviders from \"./Template/ICF/Stages/ContextProviders/contextProviders.js\";",
@@ -378,7 +378,7 @@ export const apiGroups = [
       {
         "id": "authorize-authorizePolicyUpdate",
         "key": "authorizePolicyUpdate",
-        "description": "Check verified policy-management permissions for the proposed update.",
+        "description": "Check whether the person has permission to change the rules.",
         "kind": "Stage step",
         "signature": "authorizers.authorizePolicyUpdate(intent)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -389,7 +389,7 @@ export const apiGroups = [
       {
         "id": "authorize-authorizeLessonRecommendation",
         "key": "authorizeLessonRecommendation",
-        "description": "Check whether the verified learner can receive a recommendation.",
+        "description": "Check whether the learner is allowed to receive a lesson suggestion.",
         "kind": "Stage step",
         "signature": "authorizers.authorizeLessonRecommendation(intent)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -400,7 +400,7 @@ export const apiGroups = [
       {
         "id": "authorize-allow",
         "key": "allow",
-        "description": "Explicit allow authorizer.",
+        "description": "Always let the request through this permission step.",
         "kind": "Stage step",
         "signature": "authorizers.allow(intent)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -414,7 +414,7 @@ export const apiGroups = [
       {
         "id": "authorize-deny",
         "key": "deny",
-        "description": "Explicit deny authorizer.",
+        "description": "Always stop the request at this permission step.",
         "kind": "Stage step",
         "signature": "authorizers.deny(intent)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -428,7 +428,7 @@ export const apiGroups = [
       {
         "id": "authorize-passAuthorize",
         "key": "passAuthorize",
-        "description": "Explicit pass-through authorizer for Intents that have no permission check beyond registration yet.",
+        "description": "Let the request through Authorize without an extra check.",
         "kind": "Stage object",
         "signature": "authorizers.passAuthorize",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -439,7 +439,7 @@ export const apiGroups = [
       {
         "id": "authorize-createRequireActorRoleAuthorizer",
         "key": "createRequireActorRoleAuthorizer",
-        "description": "Creates an authorizer that requires the actor to have one of the allowed roles.",
+        "description": "Make a permission check that matches actor.role against a list.",
         "kind": "Configured helper",
         "signature": "authorizers.createRequireActorRoleAuthorizer(allowedRoles)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -453,7 +453,7 @@ export const apiGroups = [
       {
         "id": "authorize-createRequireContextRoleAuthorizer",
         "key": "createRequireContextRoleAuthorizer",
-        "description": "Creates an authorizer that requires intent.context.actorRole to match one of the allowed roles.",
+        "description": "Make a permission check that matches the role saved in context against a list.",
         "kind": "Configured helper",
         "signature": "authorizers.createRequireContextRoleAuthorizer(allowedRoles)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -467,7 +467,7 @@ export const apiGroups = [
       {
         "id": "authorize-createRequireContextValueAuthorizer",
         "key": "createRequireContextValueAuthorizer",
-        "description": "Creates an authorizer that requires a context value to equal an expected value.",
+        "description": "Make a permission check that compares a context field with the value you expect.",
         "kind": "Configured helper",
         "signature": "authorizers.createRequireContextValueAuthorizer(contextKey, expectedValue)",
         "importLine": "import authorizers from \"./Template/ICF/Stages/Authorizers/authorizers.js\";",
@@ -489,7 +489,7 @@ export const apiGroups = [
       {
         "id": "process-createPolicyUpdateProcessor",
         "key": "createPolicyUpdateProcessor",
-        "description": "Save the proposed policy revision through the version-aware policy store.",
+        "description": "Save the new scoring rules if the version still matches the one the editor started with.",
         "kind": "Configured helper",
         "signature": "processors.createPolicyUpdateProcessor(policyStore)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -500,7 +500,7 @@ export const apiGroups = [
       {
         "id": "process-processLessonRecommendation",
         "key": "processLessonRecommendation",
-        "description": "Project the selected lesson and score into resultData.",
+        "description": "Put the chosen lesson and its score in resultData.",
         "kind": "Stage step",
         "signature": "processors.processLessonRecommendation(intent)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -511,7 +511,7 @@ export const apiGroups = [
       {
         "id": "process-doNothing",
         "key": "doNothing",
-        "description": "Explicit no-op processor.",
+        "description": "Pass through Process without making a change.",
         "kind": "Stage step",
         "signature": "processors.doNothing(intent)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -525,7 +525,7 @@ export const apiGroups = [
       {
         "id": "process-passProcess",
         "key": "passProcess",
-        "description": "Explicit pass-through processor for Intents that do not change result data or state yet.",
+        "description": "Pass through Process without making a change.",
         "kind": "Stage object",
         "signature": "processors.passProcess",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -536,7 +536,7 @@ export const apiGroups = [
       {
         "id": "process-exampleSetCreatedProductResult",
         "key": "exampleSetCreatedProductResult",
-        "description": "Example processor that writes a simple product-created result into intent.context.resultData.",
+        "description": "Write a sample product result to resultData.",
         "kind": "Stage object",
         "signature": "processors.exampleSetCreatedProductResult",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -547,7 +547,7 @@ export const apiGroups = [
       {
         "id": "process-createSetResultDataProcessor",
         "key": "createSetResultDataProcessor",
-        "description": "Creates a processor that stores fixed result data in intent.context.resultData.",
+        "description": "Make a step that writes fixed values to resultData.",
         "kind": "Configured helper",
         "signature": "processors.createSetResultDataProcessor(resultData)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -561,7 +561,7 @@ export const apiGroups = [
       {
         "id": "process-addPayloadToResultData",
         "key": "addPayloadToResultData",
-        "description": "Adds intent.payload into intent.context.resultData.",
+        "description": "Copy the request input into resultData.",
         "kind": "Stage step",
         "signature": "processors.addPayloadToResultData(intent)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -575,7 +575,7 @@ export const apiGroups = [
       {
         "id": "process-addContextToResultData",
         "key": "addContextToResultData",
-        "description": "Adds intent.context into intent.context.resultData.",
+        "description": "Copy the request’s context into resultData.",
         "kind": "Stage step",
         "signature": "processors.addContextToResultData(intent)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -589,7 +589,7 @@ export const apiGroups = [
       {
         "id": "process-setDemoResult",
         "key": "setDemoResult",
-        "description": "Marks the demo intent as successfully processed.",
+        "description": "Mark the demo as having finished Process.",
         "kind": "Stage step",
         "signature": "processors.setDemoResult(intent)",
         "importLine": "import processors from \"./Template/ICF/Stages/Processors/processors.js\";",
@@ -610,7 +610,7 @@ export const apiGroups = [
       {
         "id": "emit-emitAdaptiveResult",
         "key": "emitAdaptiveResult",
-        "description": "Append an event describing the completed adaptive action.",
+        "description": "Add an event that says what the lesson or rules request did.",
         "kind": "Stage step",
         "signature": "emitters.emitAdaptiveResult(intent)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -621,7 +621,7 @@ export const apiGroups = [
       {
         "id": "emit-passEmit",
         "key": "passEmit",
-        "description": "Explicit pass-through emitter.",
+        "description": "Let the request through Emit as it is.",
         "kind": "Stage step",
         "signature": "emitters.passEmit(intent)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -635,7 +635,7 @@ export const apiGroups = [
       {
         "id": "emit-createAddSuccessMessageEmitter",
         "key": "createAddSuccessMessageEmitter",
-        "description": "Creates an emitter that adds a success message to resultData.",
+        "description": "Make a step that writes a success message to resultData.",
         "kind": "Configured helper",
         "signature": "emitters.createAddSuccessMessageEmitter(message)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -649,7 +649,7 @@ export const apiGroups = [
       {
         "id": "emit-createAddEventEmitter",
         "key": "createAddEventEmitter",
-        "description": "Creates an emitter that adds a standard event to intent.context.events.",
+        "description": "Make a step that adds an event to the request’s event list.",
         "kind": "Configured helper",
         "signature": "emitters.createAddEventEmitter(eventType, eventData)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -664,7 +664,7 @@ export const apiGroups = [
       {
         "id": "emit-createAddResultMessageEmitter",
         "key": "createAddResultMessageEmitter",
-        "description": "Creates an emitter that adds a message to intent.context.resultData.",
+        "description": "Make a step that adds a message to resultData.",
         "kind": "Configured helper",
         "signature": "emitters.createAddResultMessageEmitter(messageKey, message)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -679,7 +679,7 @@ export const apiGroups = [
       {
         "id": "emit-addDemoSuccessMessage",
         "key": "addDemoSuccessMessage",
-        "description": "Attach the configured ICF demo success message.",
+        "description": "Add the demo’s success message.",
         "kind": "Stage step",
         "signature": "emitters.addDemoSuccessMessage(intent)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -690,7 +690,7 @@ export const apiGroups = [
       {
         "id": "emit-addDemoCompletedEvent",
         "key": "addDemoCompletedEvent",
-        "description": "Append the configured DemoIntentCompleted event to the demo result.",
+        "description": "Add a DemoIntentCompleted event to the demo result.",
         "kind": "Stage step",
         "signature": "emitters.addDemoCompletedEvent(intent)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -701,7 +701,7 @@ export const apiGroups = [
       {
         "id": "emit-addDebugSummary",
         "key": "addDebugSummary",
-        "description": "Adds a debug summary to resultData.",
+        "description": "Add details to resultData that can help you find a problem.",
         "kind": "Stage step",
         "signature": "emitters.addDebugSummary(intent)",
         "importLine": "import emitters from \"./Template/ICF/Stages/Emitters/emitters.js\";",
@@ -722,7 +722,7 @@ export const apiGroups = [
       {
         "id": "runner-run",
         "key": "run",
-        "description": "Execute an Intent and return its result with a trace of the named steps that ran.",
+        "description": "Run the Intent. Get the answer or error, along with a list of the named steps that ran.",
         "kind": "Function",
         "signature": "pipeline.run(intent)",
         "importLine": "import pipeline from \"./Template/ICF/engine/pipeline.js\";",
@@ -743,7 +743,7 @@ export const apiGroups = [
       {
         "id": "registry-registerIntent",
         "key": "registerIntent",
-        "description": "Registers one Intent factory.",
+        "description": "Tell the registry which function makes one kind of Intent.",
         "kind": "Function",
         "signature": "intentRegistry.registerIntent(intentType, intentFactory)",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -758,7 +758,7 @@ export const apiGroups = [
       {
         "id": "registry-registerIntents",
         "key": "registerIntents",
-        "description": "Registers many Intent factories at once.",
+        "description": "Tell the registry which functions make several kinds of Intents.",
         "kind": "Function",
         "signature": "intentRegistry.registerIntents(intentFactories)",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -772,7 +772,7 @@ export const apiGroups = [
       {
         "id": "registry-createIntent",
         "key": "createIntent",
-        "description": "Creates an Intent by type.",
+        "description": "Make a new request using a registered action name.",
         "kind": "Function",
         "signature": "intentRegistry.createIntent(intentType, actor, payload, options)",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -789,7 +789,7 @@ export const apiGroups = [
       {
         "id": "registry-getIntentFactory",
         "key": "getIntentFactory",
-        "description": "Gets a registered Intent factory.",
+        "description": "Find the function that makes a registered kind of Intent.",
         "kind": "Function",
         "signature": "intentRegistry.getIntentFactory(intentType)",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -803,7 +803,7 @@ export const apiGroups = [
       {
         "id": "registry-hasIntent",
         "key": "hasIntent",
-        "description": "Checks whether an Intent type is registered.",
+        "description": "Check whether the registry knows this action name.",
         "kind": "Function",
         "signature": "intentRegistry.hasIntent(intentType)",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -817,7 +817,7 @@ export const apiGroups = [
       {
         "id": "registry-listIntentTypes",
         "key": "listIntentTypes",
-        "description": "Lists all registered Intent types.",
+        "description": "Show all action names the registry knows.",
         "kind": "Function",
         "signature": "intentRegistry.listIntentTypes()",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -830,7 +830,7 @@ export const apiGroups = [
       {
         "id": "registry-clearRegistry",
         "key": "clearRegistry",
-        "description": "Clears all registered Intents.",
+        "description": "Remove all the action names and their factories from the registry.",
         "kind": "Function",
         "signature": "intentRegistry.clearRegistry()",
         "importLine": "import intentRegistry from \"./Template/ICF/engine/intentRegistry.js\";",
@@ -894,7 +894,7 @@ export const apiGroups = [
       {
         "id": "results-passThrough",
         "key": "passThrough",
-        "description": "Creates a pass-through success result.",
+        "description": "Return success and keep the same Intent.",
         "kind": "Function",
         "signature": "resultHelpers.passThrough(intent)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -923,7 +923,7 @@ export const apiGroups = [
       {
         "id": "results-stepFailure",
         "key": "stepFailure",
-        "description": "Creates a failure result for one specific step.",
+        "description": "Build an error that names the stage and step that failed.",
         "kind": "Function",
         "signature": "resultHelpers.stepFailure(stageName, stepName, errors)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -967,7 +967,7 @@ export const apiGroups = [
       {
         "id": "results-contextFailure",
         "key": "contextFailure",
-        "description": "Creates an AddContext failure.",
+        "description": "Build an error for a step that stopped in AddContext.",
         "kind": "Function",
         "signature": "resultHelpers.contextFailure(errors)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -981,7 +981,7 @@ export const apiGroups = [
       {
         "id": "results-authorizationFailure",
         "key": "authorizationFailure",
-        "description": "Creates an authorization failure.",
+        "description": "Build an error for a permission check that failed.",
         "kind": "Function",
         "signature": "resultHelpers.authorizationFailure(reason)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -1145,7 +1145,7 @@ export const apiGroups = [
       {
         "id": "results-normalizeErrors",
         "key": "normalizeErrors",
-        "description": "Creates a standard error message array.",
+        "description": "Put error messages into one list the runner can read.",
         "kind": "Function",
         "signature": "resultHelpers.normalizeErrors(errors)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -1159,7 +1159,7 @@ export const apiGroups = [
       {
         "id": "results-getResultData",
         "key": "getResultData",
-        "description": "Gets result data safely.",
+        "description": "Read the data the steps built for the final answer.",
         "kind": "Function",
         "signature": "resultHelpers.getResultData(intent)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -1173,7 +1173,7 @@ export const apiGroups = [
       {
         "id": "results-getEvents",
         "key": "getEvents",
-        "description": "Gets events safely.",
+        "description": "Read the events the steps added to the request.",
         "kind": "Function",
         "signature": "resultHelpers.getEvents(intent)",
         "importLine": "import resultHelpers from \"./Template/ICF/engine/resultHelpers.js\";",
@@ -1353,7 +1353,7 @@ export const apiGroups = [
       {
         "id": "adaptive-api-rankContextCandidates",
         "key": "rankContextCandidates",
-        "description": "Apply eligibility, scoring, ordering, threshold, and selection-budget rules.",
+        "description": "Check which choices can be used, score them, and keep the top choices allowed by the rules.",
         "kind": "Function",
         "signature": "rankContextCandidates(candidates, signals, policy, execution)",
         "importLine": "import { rankContextCandidates } from \"./Template/ICF/engine/adaptiveContext.js\";",
@@ -1364,7 +1364,7 @@ export const apiGroups = [
       {
         "id": "adaptive-api-scoreContextCandidate",
         "key": "scoreContextCandidate",
-        "description": "Calculate a candidate score and explain individual signal contributions.",
+        "description": "Add up a choice’s score and show what each clue added or took away.",
         "kind": "Function",
         "signature": "scoreContextCandidate(rule, signals)",
         "importLine": "import { scoreContextCandidate } from \"./Template/ICF/engine/adaptiveContext.js\";",
@@ -1375,7 +1375,7 @@ export const apiGroups = [
       {
         "id": "adaptive-api-validateContextPolicy",
         "key": "validateContextPolicy",
-        "description": "Validate scoring-policy fields, bounds, and selection settings.",
+        "description": "Check that the scoring rules use allowed values and limits.",
         "kind": "Function",
         "signature": "validateContextPolicy(policy)",
         "importLine": "import { validateContextPolicy } from \"./Template/ICF/engine/adaptiveContext.js\";",
@@ -1386,7 +1386,7 @@ export const apiGroups = [
       {
         "id": "adaptive-api-createMemoryContextPolicyStore",
         "key": "createMemoryContextPolicyStore",
-        "description": "Keep policy versions and history in an in-memory store with revision-aware writes.",
+        "description": "Keep the current rules and their history in memory. Check the version when saving a change.",
         "kind": "Function",
         "signature": "createMemoryContextPolicyStore(initialPolicy)",
         "importLine": "import { createMemoryContextPolicyStore } from \"./Template/ICF/engine/contextPolicyStore.js\";",

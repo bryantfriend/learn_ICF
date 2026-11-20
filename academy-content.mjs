@@ -2816,87 +2816,87 @@ export const questions = [
 export const guide = [
   [
     "intent",
-    "Intent, actor, payload, and metadata",
-    "An Intent names a meaningful action. Actor identifies who initiated it; payload contains requested inputs; context holds supporting facts; meta records information such as source and createdAt. The factory also attaches the stage map. The browser must not be allowed to invent a trusted actor identity."
+    "Parts of a request",
+    "An Intent names the action. The actor asks for it. The payload is what they send. The context holds facts and results. The meta field can say where or when the request started. Use the signed-in account to check who sent it."
   ],
   [
     "registration",
-    "Registration versus creating a request",
-    "ICF/Intents/intents.js registers type names and factory functions once during startup. intentRegistry.createIntent(type, actor, payload, options) calls the factory for one action. Check createResult.ok before pipeline.run(createResult.intent). Registration is not a seventh execution stage."
+    "Register, then make a request",
+    "At startup, tell the registry which function makes each kind of Intent. Later, createIntent makes one request. Check that it worked before handing the request to pipeline.run."
   ],
   [
     "stages",
     "The six stages, in order",
-    "Validate → Normalize → AddContext → Authorize → Process → Emit. All six groups must exist, with at least one named step each. A failing step stops the run; later stages do not execute. Older supplemental examples call Emit “Finalize” or AddContext “Context.” Use the current template’s names for new projects."
+    "The order is Validate, Normalize, AddContext, Authorize, Process, and Emit. Every stage needs at least one named step. When a step fails, the runner stops. Older examples can use names such as Context and Finalize."
   ],
   [
     "validate",
-    "Validate and Normalize",
-    "Validate checks raw structure, types, and applicable preconditions without changing important state. Normalize then trims, converts, and standardizes accepted inputs. If numeric strings are accepted, validate their format before conversion. Never assume normalization has run during Validate."
+    "Check input, then clean it up",
+    "Validate checks the input as it arrived. Normalize then trims spaces or changes values to the format you need. If the app accepts a number written as text, check that text before converting it."
   ],
   [
     "context",
-    "AddContext and trust",
-    "Load or verify facts such as current membership, inventory, ownership, and permissions. Simply copying client input into context does not make it trusted. Template demo helpers illustrate mechanics; a real app must connect authenticated identity and authoritative records."
+    "Facts the app can trust",
+    "AddContext looks up facts the app needs. For example, read the price from the store’s list. A user can choose an item. The store should set the price."
   ],
   [
     "authorize",
-    "Authorize and state transitions",
-    "Decide whether the actor can perform this action using the verified facts. Deny illegal state transitions before Process when possible. Recheck changing conditions atomically at the write boundary to prevent two requests using the same stale state."
+    "Check permission before saving",
+    "Authorize checks if someone can do this action to this item right now. For example, the owner can edit an open draft. A published draft is already closed to edits."
   ],
   [
     "process",
-    "Process and Emit",
-    "Process performs the main state change. Emit produces controlled follow-through such as result messages, notifications, analytics, and audit events. Do not move the core mutation into Emit or put UI rendering inside Process."
+    "Save the change and share the result",
+    "Process makes the main change or works out the answer. Emit prepares a message about it. If a message fails, check whether Process already saved the change before trying again."
   ],
   [
     "pass-through",
-    "Pass-through stages and return shapes",
-    "A plain step returns { ok: true, intent: intent } to pass the Intent through. A successful step can supply a replacement Intent or omit the intent field to keep the current one. A failure returns { ok: false, errors: [\"Clear reason\"] }."
+    "What each step returns",
+    "A plain step returns an object with ok set to true or false. Include an updated Intent when the next step needs it. If a stage has no work, add a step that passes the request through."
   ],
   [
     "folders",
-    "Where files go in the template",
-    "ICF/engine holds the runner, registry, and result helpers. ICF/Intents holds declarations. ICF/Stages contains Validators, Normalizers, ContextProviders, Authorizers, Processors, and Emitters. Each stage category contains Core and Domain; put feature folders under Domain. Base registry files expose named helpers. StageFactories create reusable stage objects with metadata and run()."
+    "Where the code goes",
+    "Put Intent files in Intents. Put shared stage helpers in Core and helpers for one part of the app in Domain. Follow a named step from the Intent to the file it uses."
   ],
   [
     "style",
-    "Readable Intent declarations and JavaScript style",
-    "Use traditional named functions and clear names in template code. Keep business logic in stage helpers; Intent declarations should be quick to scan. The template avoids arrows, optional chaining, nullish coalescing, Crypto API, and dense shortcuts. Some focused coding drills use generic JavaScript shorthand; adapt them to these conventions in your project."
+    "Keep the list of steps easy to read",
+    "Give each step a name that says what it does. Keep tricky rules in their own helper files so you can read the whole Intent without digging through the details."
   ],
   [
     "errors",
-    "Debug a stopped pipeline",
-    "Read stage, step, errors and meta.pipelineTrace on the failed run. A Pipeline failure with an empty trace points to the envelope or stage declaration. For a named step, open its Intent, find the helper in that stage group and follow the import to its implementation. Use a local fixture to repeat the failure and a success case to check the fix. If Process started, check the stored state before retrying."
+    "Find where a request stopped",
+    "Read the stage, step, and error. Then find that step in the Intent. An empty trace may mean the app stopped before any stage started."
   ],
   [
     "audit",
-    "Audit logs",
-    "Record the action ID, authorized actor ID, outcome and timing where the application needs an audit trail. Project the permitted fields for each audience. Keep private source records, credentials and the full working Intent out of shared logs."
+    "Keep a record of changes",
+    "A trace helps you debug a request. If you need a record after the app restarts, save it with a request ID and the key facts. Leave out private data."
   ],
   [
     "adaptive-debug",
-    "Debug a wrong Adaptive Context result",
-    "For a successful run with the wrong outcome, inspect intent.context.adaptiveContext. Capture the policy version, evaluation time, signal snapshot ID and candidate revisions. In decisionTrace, find the expected candidate by ID. Its reason explains exclusion or selection. For scored candidates, contributions show the factor, signal value, weight and missing flag. Re-run the same trusted fixture after changing its adapter or policy. Use synthetic records for shared bug reports."
+    "Find out why a lesson was picked",
+    "Open the decision trace. Check which choices the app skipped, how the clues changed the scores, and which rule version it used."
   ],
   [
     "transactions",
-    "Transactions, idempotency, and retries",
-    "A transaction commits related writes together. Idempotency prevents a repeated request from applying the same effect twice. An outbox stores a notification alongside a committed change for later delivery. These are project responsibilities, not automatic guarantees of this template. An Emit failure can happen after Process has committed."
+    "Save related changes and retry safely",
+    "Use a transaction to save related changes together. If a request times out, check for its saved result before you repeat a write. Retry a failed message on its own if the change already saved."
   ],
   [
     "determinism",
-    "Determinism and explicit dependencies",
-    "With the same Intent, context, and system state, the action should have the same meaningful outcome. Make time, randomness, and external dependencies explicit when they affect the decision. Supply controlled values in tests rather than hiding them inside business logic."
+    "Make a test you can repeat",
+    "Give the app the same input, rules, clock, and test records. If those stay the same, the answer should stay the same. Pass in a test clock if the time matters."
   ],
   [
     "testing",
-    "Testing and growing a feature",
-    "Test each helper’s responsibility and the complete six-stage path. Include invalid input, unauthorized actors, duplicate requests, illegal transitions, and processing or delivery failures. Start with one action, reuse helpers when they actually repeat, and keep important mutations inside the flow."
+    "Test a feature as it grows",
+    "Start with a small set of test records. Try a request that passes and one that stops. Check the answer and what the app saved."
   ],
   [
     "scope",
-    "When a full pipeline is unnecessary",
-    "Opening a modal, selecting a local tab, and previewing a color may be visual-only changes. Keep those simple. Creating an order, updating inventory, saving a lesson answer, or awarding XP changes important state and belongs in an Intent."
+    "When to use the full pipeline",
+    "Use it for actions that need shared rules or change records other people rely on. A button that only opens a panel can usually stay simple."
   ]
 ];

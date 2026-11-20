@@ -11,25 +11,25 @@ import { mountTryExample } from './tutorial-try.mjs';
 const overview = '#overview';
 const firstLesson = '#lesson/what-is-icf';
 const namedChapters = {
-  foundations: 'Getting started', stages: 'The six stages', composition: 'Composition',
-  reliability: 'Reliability & testing', adaptive: 'Adaptive Context', applications: 'Applications'
+  foundations: 'Getting started', stages: 'The six stages', composition: 'Putting steps together',
+  reliability: 'Fixing and testing code', adaptive: 'Adaptive Context', applications: 'Project examples'
 };
 const chapterIcons = ['book-open', 'blocks', 'route', 'shield', 'sliders', 'box'];
 const stageCards = [
   ['validate', 'Validate', 'Check the input', 'check-box', 'teal'],
   ['normalize', 'Normalize', 'Clean the data', 'sliders', 'blue'],
-  ['add-context', 'AddContext', 'Load trusted facts', 'database', 'violet'],
+  ['add-context', 'AddContext', 'Look up facts', 'database', 'violet'],
   ['authorize', 'Authorize', 'Check permission', 'shield', 'amber'],
-  ['process', 'Process', 'Apply the change', 'bolt', 'rose'],
+  ['process', 'Process', 'Make the change', 'bolt', 'rose'],
   ['emit', 'Emit', 'Share the result', 'radio', 'sky']
 ];
 const chapterDescriptions = {
-  foundations: 'Name an action, describe its actor and payload, and follow the path of a request.',
-  stages: 'See what each stage needs, what it produces, and where an action can stop.',
-  composition: 'Keep declarations readable as you connect factories, registries, and reusable helpers.',
-  reliability: 'Read traces, reason about committed state, and test failures and retries.',
-  adaptive: 'Rank optional evidence and explain how signals change a recommendation.',
-  applications: 'Use the framework in a project, from a browser feature to a Roblox server.'
+  foundations: 'See what goes in a request and what the app sends back.',
+  stages: 'See what each step does and when it can stop a request.',
+  composition: 'Put the steps together and show the app how to make a new request.',
+  reliability: 'Find where a request stopped. Check what saved before you try again.',
+  adaptive: 'See how clues like recent mistakes can change which lesson the app picks.',
+  applications: 'Try ICF in a library app or a Roblox game.'
 };
 const readings = [];
 const chapterFor = new Map();
@@ -133,20 +133,20 @@ function renderHome() {
     return '<a href="#lesson/' + id + '" class="stage-card ' + color + '"><div class="stage-top"><span class="stage-icon">' + icon(symbol) + '</span><span class="stage-index">' + String(index + 1).padStart(2,'0') + '</span></div><strong>' + title + '</strong><span>' + caption + '</span></a>';
   });
   const picks = ['parse-price','verify-draft-owner','inspect-emit-failure'].map(function findExample(id) { return examples.find(function match(e) { return e.id === id; }); });
-  view.innerHTML = '<section class="hero"><div class="hero-copy"><p class="hero-kicker"><i></i>Intent-Centric Framework</p><h1>ICF Wiki</h1><p class="hero-description">ICF gives each state-changing action a name and a six-stage pipeline. Find the code, contracts, and examples you need to build or debug one.</p><div class="hero-actions">' +
+  view.innerHTML = '<section class="hero"><div class="hero-copy"><p class="hero-kicker"><i></i>Intent-Centric Framework</p><h1>ICF Wiki</h1><p class="hero-description">What happens after you click Borrow, Buy, or Save? ICF gives the app six steps to follow. Learn each step, try it with code, and find out where to look when something goes wrong.</p><div class="hero-actions">' +
     buttonLink('#examples', 'Browse examples', 'code', 'bright') + buttonLink('#build', 'Build a feature', 'route', 'ghost') +
     '</div></div><div class="hero-art"><canvas id="heroDiagram" width="430" height="270" role="img" aria-label="Three connected layers of the framework: Intent, Context, and Flow."></canvas></div></section>' +
-    '<section class="home-section"><div class="section-heading"><h2>The six-stage pipeline</h2>' + link('#chapter/stages', 'Stage guide', 'sub-link') + '</div><p class="section-description">The runner follows these stages in order and stops at the first failure. Select a stage for its contract and examples.</p><div class="stage-grid">' + cards.join('') + '</div></section>' +
+    '<section class="home-section"><div class="section-heading"><h2>The six-stage pipeline</h2>' + link('#chapter/stages', 'Stage guide', 'sub-link') + '</div><p class="section-description">The runner is the code that calls these six steps in order. If a step fails, the runner stops. Pick a step to see what it does.</p><div class="stage-grid">' + cards.join('') + '</div></section>' +
     '<section class="home-section"><div class="section-heading"><h2>Find a worked example</h2>' + link('#examples','All '+examples.length+' examples','sub-link') + '</div><div class="featured-examples">' + picks.map(function featured(e) { return '<a href="#example/'+e.id+'"><span class="feature-symbol">'+icon('code')+'</span><div><strong>'+escapeHTML(e.title)+'</strong><p>'+escapeHTML(e.task)+'</p></div></a>'; }).join('') + '</div></section>' +
-    '<section class="home-section example-section"><div class="section-heading"><div>' + kicker('Interactive example') + '<h2>Run your first Intent</h2></div></div><div class="example-layout"><div><p class="section-description">Ask the framework to recommend a lesson and inspect the result.</p><div id="homeExample"></div></div><aside class="example-guide"><span class="guide-icon">' + icon('route') + '</span><h3>Follow the request</h3><ol><li><strong>Declare the Intent</strong><span>A learner requests a recommendation.</span></li><li><strong>Run the pipeline</strong><span>Six stages check and carry out the request.</span></li><li><strong>Read the result</strong><span>The selected lesson is in <code>result.data</code>.</span></li></ol>' + link('#playground', 'Try other inputs', 'sub-link') + '</aside></div></section>' +
-    '<section class="home-section"><div class="section-heading"><h2>Browse by topic</h2>' + link('#curriculum','All topics','sub-link') + '</div><p class="section-description">' + readings.length + ' topic guides, from the first envelope to production retries and Roblox gameplay.</p><div class="chapter-grid">' + chapters.map(cardForChapter).join('') + '</div></section>';
+    '<section class="home-section example-section"><div class="section-heading"><div>' + kicker('Interactive example') + '<h2>Run your first Intent</h2></div></div><div class="example-layout"><div><p class="section-description">Ask the app what to study next and see which lesson it chooses.</p><div id="homeExample"></div></div><aside class="example-guide"><span class="guide-icon">' + icon('route') + '</span><h3>Follow the request</h3><ol><li><strong>Make the request</strong><span>A learner asks the app what to study next.</span></li><li><strong>Run the pipeline</strong><span>Six stages check and carry out the request.</span></li><li><strong>Read the result</strong><span>Look for the lesson the app picked in <code>result.data</code>.</span></li></ol>' + link('#playground', 'Try other inputs', 'sub-link') + '</aside></div></section>' +
+    '<section class="home-section"><div class="section-heading"><h2>Browse by topic</h2>' + link('#curriculum','All topics','sub-link') + '</div><p class="section-description">' + readings.length + ' guides on making requests, fixing errors, and building apps and games.</p><div class="chapter-grid">' + chapters.map(cardForChapter).join('') + '</div></section>';
   drawDiagram(document.getElementById('heroDiagram'));
   mountExample(document.getElementById('homeExample'));
 }
 function renderCurriculum(chapter) {
   breadcrumb(chapter ? [['Topics','#curriculum'],[sectionName(chapter)]] : [['Topics']]);
   if (!chapter) {
-    view.innerHTML = pageIntro('Wiki contents', 'All topics', 'Look up a concept by the part of the framework it belongs to. Each topic links to worked examples and a matching studio activity.') +
+    view.innerHTML = pageIntro('Wiki contents', 'All topics', 'Pick a topic to see what it means, try an example, and practice in the studio.') +
       chapters.map(function group(item) {
         return '<section class="listing"><h2>' + link('#chapter/' + item.id, sectionName(item)) + '</h2>' + item.lessons.map(function entry(lesson) { return listRow(lessonURL(lesson), lesson.title, lesson.summary, 'file'); }).join('') + '</section>';
       }).join('');
@@ -215,11 +215,11 @@ function renderReference(id) {
   const entry = guide.find(function findEntry(row) { return row[0] === id; });
   breadcrumb(entry ? [['Reference','#reference'],[entry[1]]] : [['Reference']]);
   if (entry) {
-    view.innerHTML = pageIntro('Framework reference',entry[1],entry[2]) + '<section class="listing"><h2>Read alongside the reference</h2>' +
+    view.innerHTML = pageIntro('Framework reference',entry[1],entry[2]) + '<section class="listing"><h2>Keep reading</h2>' +
       resources.slice(0,3).map(function row(r) { return listRow(r[2],r[0],r[1],'book'); }).join('') + '</section>' + link('#reference','All reference entries','sub-link');
     return;
   }
-  view.innerHTML = pageIntro('Field guide','Framework reference','Look up a concept, check a contract, or open the source material that defines the framework.') +
+  view.innerHTML = pageIntro('Field guide','Framework reference','Look up a term or see how the ICF code works.') +
     '<section class="listing"><h2>Standards and source material</h2>' + resources.map(function row(r) { return listRow(r[2],r[0],r[1],'book'); }).join('') + '</section><section class="listing"><h2>Reference entries</h2>' +
     guide.map(function row(r) { return '<div class="reference-entry"><h3>' + link('#reference/' + r[0], r[1]) + '</h3><p>' + prose(r[2]) + '</p></div>'; }).join('') + '</section>';
 }
@@ -275,7 +275,7 @@ function renderRoute() {
     renderReference(id); const entry = guide.find(function match(r) { return r[0] === id; });
     title = entry ? entry[1] : 'Framework reference'; tab = 'reference';
   } else if (category === 'playground') {
-    breadcrumb([['Playground']]); view.innerHTML = pageIntro('Interactive lab','Pipeline playground','Run a real Intent and inspect the named steps that produced its result.') + '<div id="fullPlayground"></div>';
+    breadcrumb([['Playground']]); view.innerHTML = pageIntro('Interactive lab','Pipeline playground','Try a request and watch which steps run, where it stops, and what it returns.') + '<div id="fullPlayground"></div>';
     mountPlayground(document.getElementById('fullPlayground')); title = 'Pipeline playground'; tab = 'playground';
   } else {
     currentRoute = overview; renderHome(); title = 'ICF Wiki';
