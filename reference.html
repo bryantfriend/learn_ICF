@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn Intent, Context, and Flow through a hands-on ICF mission, practice questions, and a guide to the project template.">
+  <title>ICF Reference & Pipeline Sandbox</title>
+  <link rel="stylesheet" href="learn.css">
+  <link rel="stylesheet" href="academy-theme.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to learning</a>
+  <header class="top"><a class="brand" href="index.html">ICF <span>ACADEMY</span></a><nav aria-label="Learning navigation"><a href="#mission">Try it</a><a href="#reference">Field guide</a><a href="studio.html">Coding studio →</a><a href="academy.html">All tracks</a></nav></header>
+  <main id="main">
+    <section class="welcome">
+      <p class="eyebrow">REFERENCE & LIVE PIPELINE SANDBOX</p>
+      <h1>One action.<br>Six clear steps.</h1>
+      <p class="lead">A button says “Borrow a book.” Your app needs to decide whether that should happen. ICF makes that decision easy to follow.</p>
+      <div class="meaning"><p><strong>I · Intent</strong>What someone wants to do.</p><p><strong>C · Context</strong>The verified facts we need.</p><p><strong>F · Flow</strong>The steps that carry it out.</p></div>
+      <p>ICF is the <strong>Intent-Centric Framework</strong>. Use an Intent for meaningful state changes, like a purchase or completing a lesson. A purely visual action, like opening a dropdown, can stay simple.</p>
+    </section>
+    <section id="mission" class="mission section">
+      <div class="section-head"><div><p class="eyebrow">01 / EXPLORE</p><h2>The little library</h2></div><span class="chip">A safe practice space</span></div>
+      <p>Ava wants to borrow <em>The Moon Atlas</em>. Choose a situation, predict the outcome, then step through the flow. Each run resets the library to the selected situation.</p>
+      <div class="mission-controls"><label>Choose a situation<select id="scenario"><option value="success">A member borrows an available book</option><option value="invalid">The request has no book ID</option><option value="denied">The actor is not a library member</option><option value="unavailable">The book is already on loan</option><option value="emit-failure">The loan saves, but the notification fails</option></select></label><button id="startMission">Start this run</button></div>
+      <p class="registration"><strong>Before the flow: register the Intent.</strong> Registration tells the registry how to create BorrowBookIntent. Creating an envelope for Ava’s request is a separate step.</p>
+      <ol id="pipeline" class="pipeline" aria-label="Six execution stages"></ol>
+      <div class="mission-body"><article class="explanation"><p id="stageCounter" class="eyebrow">READY WHEN YOU ARE</p><h3 id="stageTitle">What do you think will happen?</h3><p id="stageExplanation">Will Ava get the book? If the action stops, which stage should stop it?</p><button id="nextStage" disabled>Next stage</button><p id="missionFeedback" role="status" aria-live="polite"></p></article><aside class="snapshot"><h3>Inside the request</h3><pre id="intentSnapshot"></pre><p id="libraryState" class="state-readout">Shelf: 1 book · Ava’s loans: 0</p></aside></div>
+      <details><summary>What is real in this demo?</summary><p>This mission runs the pipeline from your actual Template folder, with library-specific stage functions and in-memory state. It does not contact a database. The display pauses at each stage so you can inspect it. Real applications must supply their own trusted identity, persistence, transactions, and delivery guarantees.</p></details>
+      <details><summary>Inspect the runner’s result and trace</summary><pre id="runResult">Complete a run to inspect its result.</pre></details>
+    </section>
+    <section id="reference" class="section">
+      <p class="eyebrow">03 / KEEP THIS HANDY</p><h2>Your ICF field guide</h2>
+      <label class="search-label">Find a concept<input id="guideSearch" type="search" placeholder="Try context, errors, transactions, or folders"></label>
+      <div id="guideEntries"></div><p id="noResults" hidden>No matching concepts. Try “stage”, “actor”, or “template”.</p>
+    </section>
+    <section id="template" class="section">
+      <p class="eyebrow">04 / MAKE IT YOURS</p><h2>From this mission to your project</h2>
+      <ol class="launch-list"><li><strong>Pick one meaningful action.</strong> Name it with a verb, such as BorrowBookIntent. Write down who acts, what they send, and what should change.</li><li><strong>Copy the template.</strong> Copy the contents of Template/ into your project. From the copied root, run <code>node ICF/examples/checkPipeline.mjs</code> to see the successful and failed traces.</li><li><strong>Declare the six stage groups.</strong> Use named helpers in every group. Even a no-op group needs an explicit step returning <code>{ ok: true, intent: intent }</code>.</li><li><strong>Build one helper at a time.</strong> Add domain helpers under the relevant stage’s Domain folder and expose them through its registry. Keep the Intent as a readable stage map.</li><li><strong>Check both outcomes.</strong> Test a success, invalid input, denied permission, and a processing failure. Find the failed stage and step in the declaration. Inspect stored state before retrying a request that reached Process.</li></ol>
+      <div class="resource-links"><a href="Template/README.md">Template quick start ↗</a><a href="Template/ICF.md">Complete ICF standard ↗</a><a href="Template/ICF/Intents/DemoIntent.js">Actual demo Intent ↗</a><a href="Template/ICF/engine/pipeline.js">Actual pipeline ↗</a></div>
+      <h3>Now build each stage yourself</h3><a class="builder-launch" href="studio.html#stage-contract"><span class="section-title">Your core coding path</span><strong>Build with ICF →</strong><span>24 exercises. Six stage skills. One complete Intent. Learn, implement, and pass independent challenges.</span></a><h3>Additional practice</h3><div class="next-tracks"><a href="ICF%20Begginer/index.html"><strong>JavaScript foundations</strong><span>Practice with objects and functions if you need a gentler start.</span></a><a href="Intermediate/index.html"><strong>Reusable helpers</strong><span>Compose reusable helpers and clear contracts.</span></a><a href="Advanced/index.html"><strong>Advanced</strong><span>Explore reliability, retries, and orchestration.</span></a><a href="studio.html#adaptive-trace-failure"><strong>Trace a failing request</strong><span>Find the named helper that stopped and see which steps already passed.</span></a><a href="studio.html#adaptive-repair-signals"><strong>Repair Adaptive Context</strong><span>Explain a wrong recommendation and repair the source adapter.</span></a><a href="using%20ICF%20in%20Roblox/index.html"><strong>Roblox</strong><span>Apply the ideas in Luau and Roblox Studio.</span></a></div>
+      <p class="footnote">Coding tracks assume basic variables, objects, and functions. Luau checkpoints check text patterns; use Roblox Studio to verify execution. A completed checkpoint is practice evidence, not a guarantee of production readiness.</p>
+    </section>
+  </main><footer>Learn at your own pace. Break things here. Bring the understanding to your next project.</footer>
+  <noscript>This interactive guide needs JavaScript. You can still read the <a href="Template/ICF.md">complete ICF standard</a>.</noscript>
+  <script type="module" src="reference-runtime.mjs"></script>
+</body>
+</html>

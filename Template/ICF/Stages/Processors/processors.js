@@ -1,0 +1,37 @@
+import { createPolicyUpdateProcessor } from "./Domain/adaptiveContext/processPolicyUpdate.js";
+import { processLessonRecommendation } from "./Domain/adaptiveContext/processLessonRecommendation.js";
+// ICF/Stages/Processors/processors.js
+
+import doNothingModule from "./Core/doNothing.js";
+import passProcessModule from "./Core/passProcess.js";
+import setResultDataModule from "./Core/setResultData.js";
+import addPayloadToResultDataModule from "./Core/addPayloadToResultData.js";
+import addContextToResultDataModule from "./Core/addContextToResultData.js";
+import exampleSetCreatedProductResultModule from "./Core/exampleSetCreatedProductResult.js";
+import setDemoResultModule from "./Core/setDemoResult.js";
+
+/**
+ * Processors
+ *
+ * This file gathers all processor functions and processor factories
+ * into one readable object.
+ *
+ * Intent files should import this file, then choose the processors they need.
+ *
+ * Process should perform the main state change.
+ */
+
+var processors = {
+  createPolicyUpdateProcessor: createPolicyUpdateProcessor,
+  processLessonRecommendation: processLessonRecommendation,
+  doNothing: doNothingModule.doNothing,
+  passProcess: passProcessModule.passProcess,
+  exampleSetCreatedProductResult: exampleSetCreatedProductResultModule.exampleSetCreatedProductResult,
+  createSetResultDataProcessor: setResultDataModule.createSetResultDataProcessor,
+  addPayloadToResultData: addPayloadToResultDataModule.addPayloadToResultData,
+  addContextToResultData: addContextToResultDataModule.addContextToResultData,
+  setDemoResult: setDemoResultModule.setDemoResult
+};
+
+export default processors;
+

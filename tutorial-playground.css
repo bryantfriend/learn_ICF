@@ -1,0 +1,228 @@
+.pg-example {
+  --pg-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid #283342;
+  border-radius: 12px;
+  background: #15202d;
+  color: #e4ecf4;
+}
+.pg-editor-bar, .pg-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .72rem 1.15rem;
+  background: #1e2b39;
+}
+.pg-editor-bar { border-bottom: 1px solid #31404f; }
+.pg-file {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  font: 500 .84rem/1.4 var(--pg-mono);
+  color: #e3ebf2;
+}
+.pg-file b {
+  display: inline-grid;
+  place-items: end;
+  width: 1.18rem;
+  height: 1.18rem;
+  padding: 0 .12rem .04rem 0;
+  box-sizing: border-box;
+  border-radius: 3px;
+  background: #efce72;
+  color: #302a1d;
+  font: 750 .65rem/1 system-ui, sans-serif;
+}
+.pg-language { color: #b4c2d0; font-size: .78rem; }
+.pg-editor-code {
+  padding: 1.05rem 1.15rem 1.1rem 0;
+  overflow-x: auto;
+  background: #15202d;
+}
+.pg-editor-code code {
+  display: block;
+  width: max-content;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #e0eaf1;
+  font: 400 .86rem/1.65 var(--pg-mono);
+}
+.pg-line { display: flex; white-space: pre; }
+.pg-line-number {
+  min-width: 2.55rem;
+  padding-right: .95rem;
+  box-sizing: border-box;
+  text-align: right;
+  user-select: none;
+  color: #8d9baa;
+}
+.pg-keyword { color: #c8aff7; }
+.pg-string { color: #aadbb4; }
+.pg-call { color: #fed290; }
+.pg-comment { color: #99a9b9; }
+.pg-editor-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: .5rem .95rem;
+  border-top: 1px solid #31404f;
+}
+button.pg-run {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 2.42rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: .48rem .94rem;
+  background: #b4efdc;
+  color: #113e38;
+  font: inherit;
+  font-weight: 680;
+  font-size: .91rem;
+  cursor: pointer;
+}
+button.pg-run:hover { background: #cff9e9; }
+.pg-play {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: .31rem solid transparent;
+  border-bottom: .31rem solid transparent;
+  border-left: .47rem solid currentColor;
+}
+button.pg-run:disabled { opacity: .72; cursor: wait; }
+.pg-example-status {
+  overflow-wrap: anywhere;
+  background: none;
+  color: #c1cfda;
+  font: 400 .78rem/1.5 var(--pg-mono);
+}
+.pg-lab { color: #213441; }
+.pg-lab .pg-intro { margin: 0 0 1.5rem; line-height: 1.6; }
+.pg-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(13rem, .86fr) minmax(0, 1.14fr);
+  gap: 1rem;
+  align-items: start;
+}
+.pg-inputs, .pg-trace-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d8e1e5;
+  border-radius: 12px;
+  padding: clamp(1rem, 2vw, 1.45rem);
+  background: #fff;
+}
+.pg-lab h2 { margin: 0 0 1.15rem; font-size: 1.25rem; line-height: 1.25; }
+.pg-control, .pg-check { display: flex; font-size: .94rem; line-height: 1.5; }
+.pg-control { flex-direction: column; gap: .4rem; margin-bottom: .95rem; font-weight: 640; }
+.pg-control input, .pg-control select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.65rem;
+  box-sizing: border-box;
+  border: 1px solid #b9c9cf;
+  border-radius: 5px;
+  padding: .44rem .7rem;
+  background: #fff;
+  color: #213441;
+  font: inherit;
+  font-weight: 460;
+}
+.pg-control:has(select) { position: relative; }
+.pg-control select { appearance: none; padding-right: 2.1rem; }
+.pg-control:has(select)::after {
+  content: "";
+  position: absolute;
+  bottom: 1.15rem;
+  right: .85rem;
+  width: .42rem;
+  height: .42rem;
+  border-right: 2px solid #57717a;
+  border-bottom: 2px solid #57717a;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.pg-inputs fieldset {
+  min-width: 0;
+  margin: 1.1rem 0 0;
+  border: 0;
+  padding: 0;
+}
+.pg-inputs legend { padding: 0; margin: 0 0 .3rem; font-weight: 650; font-size: .94rem; }
+.pg-check { align-items: center; gap: .55rem; padding: .22rem 0; cursor: pointer; }
+.pg-check input { margin: 0; width: 1.05rem; height: 1.05rem; accent-color: #126858; }
+.pg-inputs .pg-run { margin-top: 1.4rem; background: #116653; color: white; }
+.pg-inputs .pg-run:hover { background: #0d5143; }
+.pg-trace-status {
+  margin: 0 0 1rem;
+  border-left: 3px solid #7890a2;
+  border-radius: 3px;
+  padding: .66rem .75rem;
+  background: #f0f4f6;
+  color: #31495b;
+  font-size: .94rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.pg-trace-status[data-outcome="success"] { border-color: #279178; background: #ebf7f2; color: #195e4f; }
+.pg-trace-status[data-outcome="failed"] { border-color: #ba5b33; background: #fff3ec; color: #854324; }
+.pg-trace {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pg-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .22rem .4rem;
+  align-items: baseline;
+  margin: 0;
+  padding: .65rem 0;
+  border-bottom: 1px solid #e4eaed;
+}
+.pg-stage strong { font-size: .98rem; font-weight: 650; }
+.pg-state { font-size: .82rem; font-weight: 650; color: #526575; }
+.pg-passed .pg-state { color: #17705b; }
+.pg-failed .pg-state { color: #a4492a; }
+.pg-stage code {
+  grid-column: 1 / -1;
+  overflow-wrap: anywhere;
+  border: 0;
+  padding: 0;
+  color: #546b78;
+  background: transparent;
+  font: 400 .8rem/1.5 "IBM Plex Mono", Consolas, monospace;
+}
+.pg-details { margin: .85rem 0 0; }
+.pg-details[hidden] { display: none; }
+.pg-details summary { font-weight: 650; color: #116653; font-size: .91rem; cursor: pointer; }
+.pg-details pre {
+  max-height: 25rem;
+  overflow: auto;
+  margin: .7rem 0 0;
+  padding: .85rem;
+  background: #162230;
+  border-radius: 5px;
+  color: #dde8ef;
+  font: 400 .82rem/1.5 "IBM Plex Mono", Consolas, monospace;
+}
+.pg-lab :focus-visible, .pg-example :focus-visible { outline: 3px solid #388ac1; outline-offset: 2px; }
+.pg-example { container-type: inline-size; }
+.pg-lab { container-type: inline-size; }
+@container (max-width: 610px) {
+  .pg-lab-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@container (max-width: 400px) {
+  .pg-editor-code code { font-size: .79rem; }
+  .pg-editor-bar, .pg-editor-actions { padding-inline: .8rem; }
+  .pg-line-number { min-width: 1.8rem; padding-right: .55rem; }
+}

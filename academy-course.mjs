@@ -1,0 +1,23 @@
+import {lessons as builder,skillNames} from './studio-course.mjs';
+import {legacyTracks,questions,guide} from './academy-content.mjs';
+import {adaptiveLessons} from './adaptive-course.mjs';
+export {skillNames};
+export const tracks=[
+  {id:'orientation',title:'Orientation',description:'Understand Intent, Context, and Flow before writing code.'},
+  {id:'foundations',title:'JavaScript Foundations',description:'Practice the language and helper patterns used in ICF.'},
+  {id:'builder',title:'Build Every Stage',description:'Build all six helpers and factories, then prove each skill independently.'},
+  {id:'composition',title:'Composition',description:'Connect reusable helpers and clear result contracts.'},
+  {id:'advanced',title:'Advanced',description:'Reason about reliability, orchestration, and operational failures.'},
+  {id:'adaptive-context',title:'Adaptive Context',description:'Rank evidence, diagnose a wrong recommendation from its trace, and publish a versioned policy.'},
+  {id:'roblox',title:'Roblox',description:'Apply ICF to server-authoritative gameplay in Luau.'}
+];
+const orientation=questions.map((q,index)=>({id:'orientation-'+q[4],track:'orientation',unit:'ICF concepts',kind:'quiz',mode:'concept',version:1,title:q[0],summary:'Make one architectural decision and explain why it matters.',duration:'2–4 min',narrative:[guide.find(g=>g[0]===q[4])?.[2]||q[3]],example:'Intent Registration\n  ↓\nValidate → Normalize → AddContext → Authorize → Process → Emit',instructions:['Choose the answer that matches the current template.','Read the feedback. Retry if needed before moving on.'],hint:'Review the stage’s responsibility and the order of the flow.',reflection:q[3],source:'reference.html#guide-'+q[4],file:'Concept '+(index+1),answers:q[1],correct:q[2],feedback:q[3],tests:[{name:'Concept understood'}],legacyConcept:q[4]}));
+function convert(track){
+  const modules=track.modules.map(m=>({id:track.id+'-'+m.id,track:track.id,unit:track.title,kind:track.id==='roblox'?'luau':'legacy-js',mode:'guided',version:1,title:m.title,summary:m.summary,duration:m.duration,narrative:m.narrative,example:m.exampleCode,instructions:[m.instructionPrompt,...m.instructions],hint:m.hint,reflection:(m.practice||m.why||[]).join(' '),source:'reference.html#reference',file:track.id==='roblox'?'challenge.lua':'challenge.js',starter:m.starterCode,solution:m.solutionCode,expectedLogs:m.expectedLogs,requiredPatterns:m.requiredPatterns,behaviorChecks:m.behaviorChecks||'',tests:track.id==='roblox'?m.requiredPatterns.map(p=>({name:'Include '+p.text})):[{name:'Expected output'},{name:'Lesson structure'},...(m.behaviorChecks?[{name:'Additional behavior'}]:[])],legacyId:m.id,legacyStorage:track.storageKey}));
+  modules.push({id:track.id+'-project',track:track.id,unit:track.title,kind:'project',mode:'project',version:1,title:track.title+' project plan',summary:track.project.prompt,duration:'20–30 min',narrative:['Bring the lessons together in a feature plan. Your plan is saved as you write.', 'This review checks coverage using the original course rubric. It does not execute a finished implementation or demonstrate independent stage mastery. The Build Every Stage capstone provides a separate executable integration challenge.'],example:'Intent: name the action and its inputs.\nValidate / Normalize: define accepted input and cleanup.\nAddContext / Authorize: load facts and decide permission.\nProcess / Emit: change state and report the outcome.',instructions:['Describe your feature in the five fields.','Include the key responsibilities from this section.','Use the starter guide for implementation, and run the finished feature in its target environment.'],hint:'Be specific about trusted data, permission, failure before writes, and delivery after writes.',reflection:'Can someone else follow the entire action from this plan?',source:track.folder+'/capstone-starter/README.md',file:'Project plan',projectChecks:track.project.checks,tests:track.project.checks.map(c=>({name:c.label})),legacyStorage:track.storageKey});
+  return modules;
+}
+export const lessons=[...orientation,...convert(legacyTracks[0]),...builder.map(item=>({...item,track:'builder',kind:'javascript'})),...legacyTracks.slice(1,3).flatMap(convert),...adaptiveLessons,...convert(legacyTracks[3])];
+export const lessonById=new Map(lessons.map(item=>[item.id,item]));
+export function passed(progress,item){return progress.passes[item.id]===item.version;}
+export function progressSummary(progress){return tracks.map(track=>{const items=lessons.filter(item=>item.track===track.id);return {...track,total:items.length,passed:items.filter(item=>passed(progress,item)).length,firstId:items[0].id};});}

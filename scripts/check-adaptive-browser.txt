@@ -1,0 +1,67 @@
+async function(page) {
+  var base = page.url().split(/[?#]/)[0].replace(/\/[^/]*$/, '');
+  var errors = [];
+  page.on('pageerror', function recordError(error) { errors.push(error.message); });
+  await page.goto(base + '/studio.html#adaptive-boundaries');
+  var lessons = await page.evaluate(async function loadLessons() {
+    var module = await import('./adaptive-course.mjs');
+    return module.adaptiveLessons;
+  });
+  for (var lesson of lessons) {
+    await page.goto(base + '/studio.html#' + lesson.id);
+    await page.getByRole('heading', { name: lesson.title, exact: true }).waitFor();
+    if (lesson.kind === 'quiz') {
+      var wrong = (lesson.correct + 1) % lesson.answers.length;
+      await page.getByRole('radio', { name: lesson.answers[wrong], exact: true }).check();
+      await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+      await page.waitForFunction(function idle() { return !document.getElementById('runTests').disabled; });
+      if (await page.locator('.test-row.fail').count() !== 1) { throw new Error('Incorrect answer passed: ' + lesson.id); }
+      await page.getByRole('radio', { name: lesson.answers[lesson.correct], exact: true }).check();
+      await page.getByRole('button', { name: 'Check answer', exact: true }).click();
+    } else {
+      await page.locator('#studioEditor').fill(lesson.starter);
+      await page.getByRole('button', { name: 'Run checks', exact: true }).click();
+      await page.waitForFunction(function idle() { return !document.getElementById('runTests').disabled; });
+      if (await page.locator('.test-row.fail').count() === 0) { throw new Error('Unsolved starter passed: ' + lesson.id); }
+      if (lesson.id === 'adaptive-repair-signals') {
+        var output = await page.locator('#consoleOutput').textContent();
+        if (!output.includes('advanced-project') || !output.includes('repeatedErrors (missing)')) { throw new Error('Missing evidence for repairing the signal adapter'); }
+      }
+      await page.locator('#studioEditor').fill(lesson.solution);
+      await page.getByRole('button', { name: 'Run checks', exact: true }).click();
+    }
+    await page.waitForFunction(function idle() { return !document.getElementById('runTests').disabled; });
+    if (await page.locator('.test-row.fail').count() || await page.locator('.test-row.pass').count() !== lesson.tests.length) {
+      throw new Error(lesson.id + ': ' + await page.locator('#testResults').innerText());
+    }
+    if (!(await page.locator('#lessonStatus').innerText()).includes('complete')) { throw new Error('Completion not saved'); }
+  }
+  await page.reload();
+  var capstone = lessons.find(function findCapstone(lesson) { return lesson.id === 'adaptive-capstone'; });
+  await page.goto(base + '/studio.html#' + capstone.id);
+  if (await page.locator('#studioEditor').inputValue() !== capstone.solution) { throw new Error('Capstone draft not retained'); }
+  if (await page.locator('#showSolution').isVisible()) { throw new Error('Independent capstone reveals its solution'); }
+  await page.getByRole('button', { name: 'Course menu', exact: true }).click();
+  await page.getByLabel('Course section', { exact: true }).selectOption('adaptive-context');
+  if (await page.locator('#lessonLinks button').count() !== lessons.length) { throw new Error('Adaptive menu count'); }
+  await page.getByRole('button', { name: 'Close course menu', exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: 'output/playwright/adaptive-capstone.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  if (await page.evaluate(function overflow() { return document.documentElement.scrollWidth > innerWidth; })) { throw new Error('Mobile capstone overflow'); }
+  await page.goto(base + '/studio.html#adaptive-boundaries');
+  if (await page.evaluate(function overflow() { return document.documentElement.scrollWidth > innerWidth; })) { throw new Error('Mobile concept overflow'); }
+  await page.screenshot({ path: 'output/playwright/adaptive-mobile.png', fullPage: true });
+  await page.goto(base + '/academy.html');
+  await page.locator('.section-card').first().waitFor();
+  if (await page.locator('.section-card').count() !== 7) { throw new Error('Overview section count'); }
+  var card = page.locator('.section-card').filter({ hasText: 'Adaptive Context' });
+  if (!(await card.innerText()).includes(lessons.length + ' / ' + lessons.length)) { throw new Error('Overview progress mismatch'); }
+  await card.click();
+  await page.waitForURL('**/studio.html#adaptive-boundaries');
+  await page.goto(base + '/academy.html');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: 'output/playwright/adaptive-overview.png', fullPage: true });
+  if (errors.length) { throw new Error(errors.join('; ')); }
+  return { activities: lessons.length, rejectionChecks: 'passed', persistence: 'passed', navigation: 'passed', responsive: 'passed', pageErrors: errors.length };
+}

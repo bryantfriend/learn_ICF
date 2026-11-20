@@ -1,0 +1,46 @@
+async function(page){
+  const base=page.url().split(/[?#]/)[0].replace(/\/[^/]*$/, '');
+  const report=[];const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(base+'/studio.html#orientation-intent');await page.reload();
+  await page.getByRole('radio',{name:'Only in a button’s click handler',exact:true}).check();await page.getByRole('button',{name:'Check answer',exact:true}).click();await page.waitForFunction(()=>!document.getElementById('runTests').disabled);
+  if(await page.locator('.test-row.fail').count()!==1)throw new Error('Incorrect concept answer passed');
+  await page.getByRole('radio',{name:'In an Intent pipeline',exact:true}).check();await page.getByRole('button',{name:'Check answer',exact:true}).click();await page.waitForFunction(()=>!document.getElementById('runTests').disabled);if(await page.locator('.test-row.pass').count()!==1)throw new Error('Correct answer failed');
+  report.push('Concept questions use the shared workspace with correct feedback');
+  const data=await page.evaluate(async()=>{const {lessons}=await import('./academy-course.mjs');return lessons;});
+  for(const id of ['foundations-intent-envelope','stage-contract','composition-'+data.find(x=>x.track==='composition').legacyId,'advanced-'+data.find(x=>x.track==='advanced').legacyId,'roblox-'+data.find(x=>x.track==='roblox').legacyId,'library-capstone','adaptive-score','adaptive-capstone']){
+    const item=data.find(x=>x.id===id);await page.goto(base+'/studio.html#'+id);await page.locator('#studioEditor').fill(item.solution);await page.getByRole('button',{name:'Run checks',exact:true}).click();await page.waitForFunction(()=>!document.getElementById('runTests').disabled);
+    if(await page.locator('.test-row.fail').count()||!(await page.locator('#lessonStatus').innerText()).includes('complete'))throw new Error(id+': '+await page.locator('#testResults').innerText());
+    if(item.kind==='luau'&&!(await page.locator('#languageLabel').innerText()).includes('NOT EXECUTED'))throw new Error('Luau mode mislabeled');
+  }
+  report.push('JavaScript, core builder, composition, advanced, Luau, and capstone checks pass');
+  await page.goto(base+'/studio.html#foundations-project');
+  const project=data.find(x=>x.id==='foundations-project');const labels={name:'Feature name',intent:'Intent and payload',validate:'Validate and Normalize',context:'AddContext and Authorize',process:'Process and Emit'};
+  for(const c of project.projectChecks)await page.getByRole('textbox',{name:labels[c.field],exact:true}).fill(c.keywords.join(' '));
+  await page.getByRole('button',{name:'Review coverage',exact:true}).click();await page.waitForFunction(()=>!document.getElementById('runTests').disabled);if(await page.locator('.test-row.fail').count())throw new Error('Project coverage failed');
+  await page.reload();if(!(await page.getByRole('textbox',{name:'Feature name',exact:true}).inputValue()).length)throw new Error('Project draft lost');
+  await page.getByRole('button',{name:'Course menu',exact:true}).click();await page.getByLabel('Course section').selectOption('roblox');if(await page.locator('#lessonLinks button').count()!==26)throw new Error('Roblox menu missing activities');await page.locator('#lessonLinks button').last().click();if(!(await page.locator('#lessonTitle').innerText()).includes('Roblox project'))throw new Error('Section menu failed');
+  report.push('Project plans persist and all section activities are navigable');
+  await page.goto(base+'/reference.html#mission');
+  await page.getByLabel('Choose a situation').selectOption('emit-failure');
+  await page.getByRole('button',{name:'Start this run',exact:true}).click();
+  for(const stage of ['Validate','Normalize','AddContext','Authorize','Process','Emit']) {
+    await page.getByRole('button',{name:'Run '+stage+' →',exact:true}).click();
+  }
+  await page.waitForFunction(()=>document.getElementById('missionFeedback').textContent.includes('Stopped at Emit.notifyBorrower'));
+  const failedLoan=JSON.parse(await page.locator('#runResult').textContent());
+  if(!failedLoan.meta.pipelineTrace.some(entry=>entry.stage==='Process'&&entry.step==='recordLoan'&&entry.ok) || !(await page.locator('#libraryState').innerText()).includes('Ava’s loans: 1')) throw new Error('Missing Process evidence after the failed delivery');
+  report.push('Field guide locates a failed delivery and shows the committed loan');
+  for(const [url,part] of [['ICF%20Begginer/index.html','foundations-'],['Intermediate/index.html','composition-'],['Advanced/index.html','advanced-'],['using%20ICF%20in%20Roblox/index.html','roblox-'],['learn.html','orientation-']]){
+    await page.goto(base+'/'+url);await page.waitForURL('**/studio.html#'+part+'*');
+  }
+  report.push('All former course entry points open the unified studio');
+  await page.setViewportSize({width:1440,height:900});await page.screenshot({path:'output/playwright/unified-orientation.png'});
+  await page.setViewportSize({width:390,height:844});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile orientation overflow');
+  await page.goto(base+'/studio.html#roblox-project');if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile project overflow');
+  await page.goto(base+'/academy.html');if(await page.locator('.section-card').count()!==7)throw new Error('Overview section count');
+  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile overview overflow');
+  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export progress',exact:true}).click();const download=await downloadPromise;await download.saveAs('output/playwright/unified-progress.json');
+  await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'output/playwright/unified-overview.png',fullPage:true});
+  if(errors.length)throw new Error(errors.join('; '));
+  report.push('Overview, progress export, and mobile/desktop layouts passed');return report;
+}

@@ -1,8 +1,46 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14243d">
+  <meta name="description" content="Look up the Intent-Centric Framework in a searchable wiki with worked examples, template API signatures, troubleshooting guides, and offline setup.">
+  <title>ICF Wiki · Intent-Centric Framework</title>
+  <link rel="icon" href="tutorial-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="tutorial.css">
+  <link rel="stylesheet" href="tutorial-playground.css">
+  <link rel="stylesheet" href="tutorial-try.css">
 </head>
- <body>
-   test
- </body> 
-</html>
+<body>
+  <a class="skip-link" href="#reader" id="skipLink">Skip to content</a>
+  <header class="topbar">
+    <button class="icon-button mobile-menu" id="menuOpen" aria-controls="sidebar" aria-expanded="false" aria-label="Open wiki menu" data-icon="menu"></button>
+    <a class="brand" href="#overview" aria-label="ICF Wiki home"><img src="tutorial-icon.svg" alt="" width="34" height="34"><span>ICF <b>Wiki</b></span></a>
+    <nav class="primary-nav" aria-label="Primary navigation">
+      <a href="#overview" data-tab="tutorial">Wiki</a><a href="#examples" data-tab="examples">Examples</a><a href="#api" data-tab="reference">Reference</a><a href="#exercises" data-tab="exercises">Learning studio</a>
+    </nav>
+    <div class="top-actions"><button id="openSearch" class="search-launch" aria-label="Search documentation"><span data-icon="search"></span><span class="search-caption">Search docs…</span><kbd>/</kbd></button>
+      <a class="icon-button github-link" href="https://github.com/bryantfriend/learn_ICF" aria-label="ICF Wiki on GitHub" title="View on GitHub" data-icon="github"></a></div>
+  </header>
+  <button class="menu-scrim" id="menuScrim" aria-label="Close wiki menu" hidden></button>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Wiki navigation">
+      <div class="sidebar-caption"><span>Wiki navigation</span><span data-icon="panel"></span></div>
+      <label class="nav-filter"><span data-icon="search"></span><input id="navFilter" type="search" aria-label="Filter wiki pages" placeholder="Filter wiki pages…"></label>
+      <nav id="tutorialNav" aria-label="Wiki contents"></nav>
+
+    </aside>
+    <main class="reader" id="reader" tabindex="-1">
+      <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+      <div id="view"><h1>ICF Wiki</h1><p>Learn the Intent-Centric Framework through its six-stage pipeline.</p></div>
+      <noscript><p>The interactive wiki uses JavaScript. Read the <a href="Template/ICF.md">framework standard</a> or the <a href="Template/README.md">template quick start</a>.</p></noscript>
+      <footer class="page-footer"><span>ICF Wiki</span><a href="https://github.com/bryantfriend/learn_ICF">View on GitHub <span data-icon="external"></span></a></footer>
+    </main>
+  </div>
+  <dialog id="searchDialog" aria-labelledby="searchTitle">
+    <h2 class="sr-only" id="searchTitle">Search the ICF Wiki</h2>
+    <div class="search-box"><span data-icon="search"></span><input id="searchInput" type="search" aria-label="Search wiki topics, examples, and API entries" placeholder="Search topics, examples, and the API…" autocomplete="off" spellcheck="false"><button id="closeSearch" aria-label="Close search">Esc</button></div>
+    <div id="searchResults"></div><div class="search-help"><span>↑ ↓ &nbsp;Move</span><span>Enter &nbsp;Open</span><span>Esc &nbsp;Close</span></div>
+  </dialog>
+  <script type="module" src="tutorial.mjs"></script>
+</body></html>
